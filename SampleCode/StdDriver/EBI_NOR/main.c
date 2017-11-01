@@ -89,42 +89,75 @@ void SYS_Init(void)
     /* Init I/O Multi-function                                                                                 */
     /*---------------------------------------------------------------------------------------------------------*/
     /* Set PB multi-function pins for UART0 RXD, TXD */
-    SYS->GPB_MFP = SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD;
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk);
+    SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD);
 
     /* Set multi-function pins for EBI AD0 ~ AD7 */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB14_Msk | SYS_GPB_MFP_PB13_Msk | SYS_GPB_MFP_PB15_Msk);
+    SYS->ALT_MFP &= (SYS_ALT_MFP_PB14_Msk | SYS_ALT_MFP_PB13_Msk | SYS_ALT_MFP_PB15_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB14_AD0 | SYS_GPB_MFP_PB13_AD1 | SYS_GPB_MFP_PB15_AD6;
     SYS->ALT_MFP |= SYS_ALT_MFP_PB14_AD0 | SYS_ALT_MFP_PB13_AD1 | SYS_ALT_MFP_PB15_AD6;
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC14_Msk | SYS_GPC_MFP_PC15_Msk);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC14_Msk | SYS_ALT_MFP_PC15_Msk);
     SYS->GPC_MFP |= SYS_GPC_MFP_PC14_AD2 | SYS_GPC_MFP_PC15_AD3;
-    SYS->ALT_MFP |= SYS_ALT_MFP_PC14_AD2 | SYS_ALT_MFP_PC15_AD3;
+    SYS->ALT_MFP |= SYS_ALT_MFP_PC14_AD2 | SYS_ALT_MFP_PC15_AD3;    
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC6_Msk | SYS_GPC_MFP_PC7_Msk);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC6_Msk | SYS_ALT_MFP_PC7_Msk);
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PC6_Msk | SYS_ALT_MFP1_PC7_Msk);
     SYS->GPC_MFP |= SYS_GPC_MFP_PC6_AD4 | SYS_GPC_MFP_PC7_AD5;
     SYS->ALT_MFP |= SYS_ALT_MFP_PC6_AD4 | SYS_ALT_MFP_PC7_AD5;
-    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PC6_AD4 | SYS_ALT_MFP1_PC7_AD5;
+    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PC6_AD4 | SYS_ALT_MFP1_PC7_AD5;    
+    SYS->GPA_MFP &= ~SYS_GPA_MFP_PA6_Msk;
+    SYS->ALT_MFP &= ~SYS_ALT_MFP_PA6_Msk;
+    SYS->ALT_MFP1 &= ~SYS_ALT_MFP1_PA6_Msk;
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PB14_Msk | SYS_ALT_MFP2_PB15_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA6_AD7;
     SYS->ALT_MFP |= SYS_ALT_MFP_PA6_AD7;
     SYS->ALT_MFP1 |= SYS_ALT_MFP1_PA6_AD7;
     SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB14_AD0 | SYS_ALT_MFP2_PB15_AD6;                                         
    
     /* Set multi-function pins for EBI AD8 ~ AD15 */
+    SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA5_Msk | SYS_GPA_MFP_PA4_Msk |
+                      SYS_GPA_MFP_PA3_Msk | SYS_GPA_MFP_PA2_Msk |
+                      SYS_GPA_MFP_PA1_Msk | SYS_GPA_MFP_PA12_Msk |
+                      SYS_GPA_MFP_PA13_Msk | SYS_GPA_MFP_PA14_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA5_AD8 | SYS_GPA_MFP_PA4_AD9 |
                     SYS_GPA_MFP_PA3_AD10 | SYS_GPA_MFP_PA2_AD11 |
                     SYS_GPA_MFP_PA1_AD12 | SYS_GPA_MFP_PA12_AD13 |
                     SYS_GPA_MFP_PA13_AD14 | SYS_GPA_MFP_PA14_AD15;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PA5_Msk | SYS_ALT_MFP_PA4_Msk |
+                      SYS_ALT_MFP_PA3_Msk | SYS_ALT_MFP_PA2_Msk |
+                      SYS_ALT_MFP_PA1_Msk | SYS_ALT_MFP_PA12_Msk |
+                      SYS_ALT_MFP_PA13_Msk | SYS_ALT_MFP_PA14_Msk);
     SYS->ALT_MFP |= SYS_ALT_MFP_PA5_AD8 | SYS_ALT_MFP_PA4_AD9 |
                     SYS_ALT_MFP_PA3_AD10 | SYS_ALT_MFP_PA2_AD11 |
                     SYS_ALT_MFP_PA1_AD12 | SYS_ALT_MFP_PA12_AD13 |
                     SYS_ALT_MFP_PA13_AD14 | SYS_ALT_MFP_PA14_AD15;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PA5_Msk | SYS_ALT_MFP1_PA4_Msk |
+                       SYS_ALT_MFP1_PA3_Msk | SYS_ALT_MFP1_PA2_Msk |
+                       SYS_ALT_MFP1_PA1_Msk | SYS_ALT_MFP1_PA12_Msk |
+                       SYS_ALT_MFP1_PA13_Msk | SYS_ALT_MFP1_PA14_Msk);
     SYS->ALT_MFP1 |= SYS_ALT_MFP1_PA5_AD8 | SYS_ALT_MFP1_PA4_AD9 |
                      SYS_ALT_MFP1_PA3_AD10 | SYS_ALT_MFP1_PA2_AD11 |
                      SYS_ALT_MFP1_PA1_AD12 | SYS_ALT_MFP1_PA12_AD13 |
                      SYS_ALT_MFP1_PA13_AD14 | SYS_ALT_MFP1_PA14_AD15;
                          
     /* Set multi-function pins for EBI nCS, ALE and MCLK */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB7_Msk | SYS_GPB_MFP_PB6_Msk);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB7_Msk | SYS_ALT_MFP_PB6_Msk);
+    SYS->GPC_MFP &= ~SYS_GPC_MFP_PC8_Msk;
+    SYS->ALT_MFP &= ~SYS_ALT_MFP_PC8_Msk;
     SYS->GPB_MFP |= SYS_GPB_MFP_PB7_nCS | SYS_GPB_MFP_PB6_ALE;
     SYS->ALT_MFP |= SYS_ALT_MFP_PB7_nCS | SYS_ALT_MFP_PB6_ALE;
     SYS->GPC_MFP |= SYS_GPC_MFP_PC8_MCLK;
     SYS->ALT_MFP |= SYS_ALT_MFP_PC8_MCLK;
 
     /* Set multi-function pins for EBI nWR, nRD, nWRL and nWRH */
+    SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA10_Msk | SYS_GPA_MFP_PA11_Msk);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PA10_Msk | SYS_ALT_MFP_PA11_Msk);
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB2_Msk | SYS_GPB_MFP_PB3_Msk);
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB2_Msk | SYS_ALT_MFP_PB3_Msk);
+    SYS->ALT_MFP1 &= ~SYS_ALT_MFP1_PB3_Msk;
     SYS->GPA_MFP |= SYS_GPA_MFP_PA10_nWR | SYS_GPA_MFP_PA11_nRD;
     SYS->ALT_MFP |= SYS_ALT_MFP_PA10_nWR | SYS_ALT_MFP_PA11_nRD;
     SYS->GPB_MFP |= SYS_GPB_MFP_PB2_nWRL | SYS_GPB_MFP_PB3_nWRH;

@@ -133,13 +133,16 @@ void SYS_Init(void)
     /* Init I/O Multi-function                                                                                 */
     /*---------------------------------------------------------------------------------------------------------*/
     /* Set PB multi-function pins for UART0 RXD, TXD, TM0, TM2, TM3 and TM2_EXT */
-    SYS->GPB_MFP = SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD;
-    SYS->GPB_MFP = SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD |
-                   SYS_GPB_MFP_PB8_TM0 | SYS_GPB_MFP_PB10_TM2 | SYS_GPB_MFP_PB11_TM3 |
-                   SYS_GPB_MFP_PB2_TM2_EXT;
-
-    SYS->ALT_MFP  = SYS_ALT_MFP_PB2_TM2_EXT;
-    SYS->ALT_MFP2 = SYS_ALT_MFP2_PB2_TM2_EXT;
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk |
+                      SYS_GPB_MFP_PB8_Msk | SYS_GPB_MFP_PB10_Msk | SYS_GPB_MFP_PB11_Msk |
+                      SYS_GPB_MFP_PB2_Msk);
+    SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD |
+                     SYS_GPB_MFP_PB8_TM0 | SYS_GPB_MFP_PB10_TM2 | SYS_GPB_MFP_PB11_TM3 |
+                     SYS_GPB_MFP_PB2_TM2_EXT);
+    SYS->ALT_MFP  &= ~SYS_ALT_MFP_PB2_Msk;
+    SYS->ALT_MFP  |= SYS_ALT_MFP_PB2_TM2_EXT;
+    SYS->ALT_MFP2 &= ~SYS_ALT_MFP2_PB2_TM2_Msk;
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB2_TM2_EXT;
 }
 
 void UART0_Init(void)

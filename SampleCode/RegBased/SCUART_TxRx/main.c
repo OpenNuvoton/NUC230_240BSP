@@ -151,11 +151,11 @@ void SYS_Init(void)
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init I/O Multi-function                                                                                 */
     /*---------------------------------------------------------------------------------------------------------*/
-    /* Set GPB multi-function pins for UART0 RXD and TXD */
+    /* Set PB multi-function pins for UART0 RXD, TXD */
     SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk);
-    SYS->GPB_MFP |= SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD;
-
-    /* Set GPA multi-function pins for SC UART mode */
+    SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD);
+    
+    /* Set PA multi-function pins for SC UART mode */
     SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA2_Msk | SYS_GPA_MFP_PA3_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA2_SC0_CLK | SYS_GPA_MFP_PA3_SC0_DAT;
     SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PA2_Msk | SYS_ALT_MFP1_PA3_Msk);
