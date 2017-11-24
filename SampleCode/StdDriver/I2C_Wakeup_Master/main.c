@@ -333,7 +333,7 @@ int32_t main(void)
 
     printf("Configure I2C0 as a master.\n");
     printf("The I/O connection for I2C0:\n");
-    printf("I2C0_SDA(P3.4), I2C0_SCL(P3.5)\n");
+    printf("I2C0_SDA(PA.8), I2C0_SCL(PA.9)\n");
 
     /* Init I2C0 to access Slave */
     I2C0_Init();
