@@ -697,8 +697,10 @@ int main(void)
     /* SAMPLE CODE                                                                                             */
     /*---------------------------------------------------------------------------------------------------------*/
 
-//     /* Set GPB12 to control CAN transceiver for Nuvoton board */
-//     PB12 = 0;
+     /* Enable CAN transceiver for Nuvoton board */
+     PE->PMD = (GPIO_PMD_OUTPUT << 2*2) | (GPIO_PMD_OUTPUT << 3*2);
+     PE2 = 0;
+     PE3 = 0;
 
     /* Some description about how to create test environment */
     Note_Configure();
