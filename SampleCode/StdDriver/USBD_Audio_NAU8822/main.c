@@ -72,16 +72,26 @@ void SYS_Init(void)
     /*---------------------------------------------------------------------------------------------------------*/
 
     /* Set GPB multi-function pins for UART0 RXD and TXD, and Clock Output */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk | SYS_GPB_MFP_PB8_Msk);
+    SYS->ALT_MFP &= ~SYS_ALT_MFP_PB8_Msk;
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD | SYS_GPB_MFP_PB8_CLKO);
     SYS->ALT_MFP |=  SYS_ALT_MFP_PB8_CLKO;
 
     /* Set GPA8, GPA9 to be I2C */
+    SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA8_Msk | SYS_GPA_MFP_PA9_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA8_I2C0_SDA | SYS_GPA_MFP_PA9_I2C0_SCL;
 
     /* Set I2S interface */
+    SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA15_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA15_I2S_MCLK;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PA15_Msk);
     SYS->ALT_MFP |= SYS_ALT_MFP_PA15_I2S_MCLK;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PA15_Msk);
+    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PA15_I2S_MCLK;
+
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC0_Msk | SYS_GPC_MFP_PC1_Msk | SYS_GPC_MFP_PC2_Msk | SYS_GPC_MFP_PC3_Msk);
     SYS->GPC_MFP |= SYS_GPC_MFP_PC0_I2S_LRCLK | SYS_GPC_MFP_PC1_I2S_BCLK | SYS_GPC_MFP_PC2_I2S_DI | SYS_GPC_MFP_PC3_I2S_DO;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC0_Msk | SYS_ALT_MFP_PC1_Msk | SYS_ALT_MFP_PC2_Msk | SYS_ALT_MFP_PC3_Msk);
     SYS->ALT_MFP |= SYS_ALT_MFP_PC0_I2S_LRCLK | SYS_ALT_MFP_PC1_I2S_BCLK | SYS_ALT_MFP_PC2_I2S_DI | SYS_ALT_MFP_PC3_I2S_DO;
 
     /* Enable CLKO(PB.8) for monitor HCLK. CLKO = HCLK/8 Hz*/

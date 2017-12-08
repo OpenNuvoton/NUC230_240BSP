@@ -4,8 +4,12 @@
 
 void Open_Buzzer(void)
 {
+    SYS->GPE_MFP &= ~(SYS_GPE_MFP_PE5_Msk);
     SYS->GPE_MFP |= SYS_GPE_MFP_PE5_PWM5;
-    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PE5_PWM5;
+    SYS->ALT_MFP &= SYS_ALT_MFP_PE5_Msk;
+    SYS->ALT_MFP |= SYS_ALT_MFP_PE5_PWM5;
+    SYS->ALT_MFP2 &= SYS_ALT_MFP2_PE5_Msk;
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PE5_PWM5;
 }
 
 void Write_Buzzer(unsigned Enable, unsigned  int Frequency, unsigned int Duty)

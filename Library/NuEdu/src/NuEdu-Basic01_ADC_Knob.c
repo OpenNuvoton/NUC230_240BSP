@@ -17,7 +17,8 @@ void Open_ADC_Knob(void)
     SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA0_Msk) ;
     SYS->GPA_MFP |= SYS_GPA_MFP_PA0_ADC0 ;
 
-    SYS->ALT_MFP1 = 0;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PA0_Msk);
+    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PA0_ADC0;
 
     /* Set the ADC operation mode as single, input mode as single-end and enable the analog input channel 7 */
     ADC_Open(ADC, ADC_ADCR_DIFFEN_SINGLE_END, ADC_ADCR_ADMD_SINGLE, 0x1 << 0);

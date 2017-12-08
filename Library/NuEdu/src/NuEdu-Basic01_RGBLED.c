@@ -6,9 +6,12 @@ void Initial_PWM_LED(void)
 {
 
     /* Set PA12~PA14 multi-function pins for PWMA Channel0~2  */
-    SYS->GPA_MFP = SYS_GPA_MFP_PA12_PWM0 | SYS_GPA_MFP_PA13_PWM1 | SYS_GPA_MFP_PA14_PWM2;
-    SYS->ALT_MFP1 = SYS_ALT_MFP1_PA12_PWM0 | SYS_ALT_MFP1_PA13_PWM1 | SYS_ALT_MFP1_PA14_PWM2;
-
+    SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA12_Msk | SYS_GPA_MFP_PA13_Msk | SYS_GPA_MFP_PA14_Msk);
+    SYS->GPA_MFP |= SYS_GPA_MFP_PA12_PWM0 | SYS_GPA_MFP_PA13_PWM1 | SYS_GPA_MFP_PA14_PWM2;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PA12_Msk | SYS_ALT_MFP_PA13_Msk | SYS_ALT_MFP_PA14_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PA12_PWM0 | SYS_ALT_MFP_PA13_PWM1 | SYS_ALT_MFP_PA14_PWM2;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PA12_Msk | SYS_ALT_MFP1_PA13_Msk | SYS_ALT_MFP1_PA14_Msk);
+    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PA12_PWM0 | SYS_ALT_MFP1_PA13_PWM1 | SYS_ALT_MFP1_PA14_PWM2;
 }
 
 void PWM_LED(unsigned char ch, unsigned int ch0_fre, unsigned int ch0_dut, unsigned int ch1_fre, unsigned int ch1_dut, unsigned int ch2_fre, unsigned int ch2_dut)

@@ -91,7 +91,10 @@ void SYS_Init(void)
     /* Set GPB multi-function pins for external interrupt */
     SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB14_Msk | SYS_GPB_MFP_PB15_Msk);
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB14_INT0 | SYS_GPB_MFP_PB15_INT1);
-
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB14_Msk | SYS_ALT_MFP_PB15_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PB14_INT0 | SYS_ALT_MFP_PB15_INT1;
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PB14_Msk | SYS_ALT_MFP2_PB15_Msk);
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB14_INT0 | SYS_ALT_MFP2_PB15_INT1;
 }
 
 void UART0_Init()

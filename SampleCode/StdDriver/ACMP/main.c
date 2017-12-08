@@ -103,17 +103,23 @@ void SYS_Init(void)
     /* Init I/O Multi-function                                                                                 */
     /*---------------------------------------------------------------------------------------------------------*/
     /* Set PC.6 multi-function pin for ACMP0 positive input pin */
-    SYS->GPC_MFP = SYS_GPC_MFP_PC6_ACMP0_P;
-    SYS->ALT_MFP1 = SYS_ALT_MFP1_PC6_ACMP0_P;
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC6_Msk);
+    SYS->GPC_MFP |= SYS_GPC_MFP_PC6_ACMP0_P;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC6_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PC6_ACMP0_P;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PC6_Msk);
+    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PC6_ACMP0_P;
 
     /* Disable digital input path of analog pin ACMP0_P to prevent leakage */
     GPIO_DISABLE_DIGITAL_PATH(PC, (1ul << 6));
 
     /* Set PB multi-function pins for UART0 RXD, TXD and ACMP0 output */
-    SYS->GPB_MFP = SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD | SYS_GPB_MFP_PB2_ACMP0_O;
-    SYS->ALT_MFP = SYS_ALT_MFP_PB2_ACMP0_O;
-    SYS->ALT_MFP2 = SYS_ALT_MFP2_PB2_ACMP0_O;
-
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk | SYS_GPB_MFP_PB2_Msk);
+    SYS->GPB_MFP |= SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD | SYS_GPB_MFP_PB2_ACMP0_O;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB2_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PB2_ACMP0_O;
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PB2_Msk);
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB2_ACMP0_O;
 }
 
 /*** (C) COPYRIGHT 2014 Nuvoton Technology Corp. ***/

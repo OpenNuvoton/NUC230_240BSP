@@ -75,8 +75,10 @@ void SYS_Init(void)
     /*---------------------------------------------------------------------------------------------------------*/
 
     /* Set GPB multi-function pins for UART0 RXD and TXD, and Clock Output */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk | SYS_GPB_MFP_PB8_Msk);
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD | SYS_GPB_MFP_PB8_CLKO);
-    SYS->ALT_MFP |=  SYS_ALT_MFP_PB8_CLKO;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB8_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PB8_CLKO;
 
     /* Enable CLKO(PB8) for monitor HCLK. CLKO = HCLK/8 Hz*/
     EnableCLKO((2 << CLK_CLKSEL2_FRQDIV_S_Pos), 2);

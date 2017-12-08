@@ -44,9 +44,11 @@ void SYS_Init(void)
     /*---------------------------------------------------------------------------------------------------------*/
 #ifdef DEBUG_ENABLE_UART1
     /* Set PB.4 and PB.5 multi-function pins for UART1 RXD, UART1 TXD */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB4_Msk | SYS_GPB_MFP_PB5_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB4_UART1_RXD | SYS_GPB_MFP_PB5_UART1_TXD;
 #else
     /* Set PB.0 and PB.1 multi-function pins for UART0 RXD, UART0 TXD */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD;
 #endif
 

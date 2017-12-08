@@ -8,7 +8,12 @@ void Initial_EINT0_GPIO(void)
     GPIO_SetMode(PB, BIT14, GPIO_PMD_INPUT);
 
     /* Set PB.14 multi-function pins for EINT0 */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB14_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB14_INT0;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB14_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PB14_INT0;
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PB14_Msk);
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB14_INT0;
 }
 
 void Open_EINT0(void)

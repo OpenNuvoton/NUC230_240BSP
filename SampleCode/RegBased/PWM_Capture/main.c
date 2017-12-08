@@ -177,8 +177,12 @@ void SYS_Init(void)
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD);
 
     /* Set GPE multi-function pins for PWMB Channel1 and channel2 */
-    SYS->GPE_MFP = SYS_GPE_MFP_PE5_PWM5 | SYS_GPE_MFP_PE0_PWM6;
-
+    SYS->GPE_MFP &= ~(SYS_GPE_MFP_PE5_Msk | SYS_GPE_MFP_PE0_Msk);
+    SYS->GPE_MFP |= SYS_GPE_MFP_PE5_PWM5 | SYS_GPE_MFP_PE0_PWM6;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PE5_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PE5_PWM5;
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PE5_Msk);
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PE5_PWM5;
 }
 
 void UART0_Init()

@@ -154,6 +154,8 @@ void SYS_Init(void)
                      SYS_GPB_MFP_PB4_UART1_RXD | SYS_GPB_MFP_PB5_UART1_TXD |
                      SYS_GPB_MFP_PB7_UART1_nCTS);
 
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB7_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PB7_UART1_nCTS;
 }
 
 void UART0_Init()

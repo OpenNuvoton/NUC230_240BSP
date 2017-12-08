@@ -36,7 +36,9 @@ void Initial_PWM_DAC(void)
 {
 
     GPIO_SetMode(PA, 0x2, GPIO_PMD_INPUT); //avoid to PWM dac out
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB11_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB11_PWM4;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB11_Msk);
     SYS->ALT_MFP |= SYS_ALT_MFP_PB11_PWM4;
 }
 

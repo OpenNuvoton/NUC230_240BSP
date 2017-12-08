@@ -9,9 +9,12 @@ void Open_ACMP(void)
     /* Init I/O Multi-function                                                                                 */
     /*---------------------------------------------------------------------------------------------------------*/
     /* Set PC.6 multi-function pin for ACMP0 positive input pin */
+    SYS->GPC_MFP &= ~(SYS_GPC_MFP_PC6_Msk | SYS_GPC_MFP_PC7_Msk);
     SYS->GPC_MFP |= SYS_GPC_MFP_PC6_ACMP0_P | SYS_GPC_MFP_PC7_ACMP0_N;
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PC6_Msk | SYS_ALT_MFP_PC6_Msk);
+    SYS->ALT_MFP |= SYS_ALT_MFP_PC6_ACMP0_P | SYS_GPC_MFP_PC7_ACMP0_N;
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PC6_Msk | SYS_ALT_MFP1_PC7_Msk);
     SYS->ALT_MFP1 |= SYS_ALT_MFP1_PC6_ACMP0_P | SYS_ALT_MFP1_PC7_ACMP0_N;
-
 
     /* Disable digital input path of analog pin ACMP0_P and ACMP0_N to prevent leakage */
     GPIO_DISABLE_DIGITAL_PATH(PC, (1ul << 6));

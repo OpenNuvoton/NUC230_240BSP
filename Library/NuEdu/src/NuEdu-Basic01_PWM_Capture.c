@@ -6,9 +6,8 @@
 void Open_PWM6_OUT(uint32_t Enable, uint32_t PWM_Frequency, uint32_t PWM_Duty)
 {
 
-    //SYS->GPE_MFP = (SYS->GPE_MFP & ~SYS_GPE_MFP_PE0_Msk) | SYS_GPE_MFP_PE0_PWM6;
+    SYS->GPE_MFP &= ~(SYS_GPE_MFP_PE0_Msk);
     SYS->GPE_MFP |= SYS_GPE_MFP_PE0_PWM6;
-    SYS->ALT_MFP1 |= SYS_ALT_MFP1_PE0_PWM6;
 
     /* Enable PWM module clock */
     CLK_EnableModuleClock(PWM67_MODULE);

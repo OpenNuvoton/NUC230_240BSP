@@ -7,13 +7,20 @@ void Initial_Timer_Port(void)
 
 
     /* Set PB multi-function pins for UART0 RXD, UART0 TXD; TMR0 ~ TMR3 external counter pins; TMR0, TMR2 and TMR3 external capture pins */
+    SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB10_Msk | SYS_GPB_MFP_PB3_Msk);
     SYS->GPB_MFP |= SYS_GPB_MFP_PB10_TM2 | SYS_GPB_MFP_PB3_TM3_EXT;
 
     /* Set ALT MPF settings for TMR0 ~ TMR3 external counter and capture functions */
+    SYS->ALT_MFP &= ~(SYS_ALT_MFP_PB10_Msk | SYS_ALT_MFP_PB3_Msk);
     SYS->ALT_MFP |= SYS_ALT_MFP_PB10_TM2 | SYS_ALT_MFP_PB3_TM3_EXT;
 
     /* Set ALT MPF1 settings for TMR3 external capture */
+    SYS->ALT_MFP1 &= ~(SYS_ALT_MFP1_PB3_Msk);
     SYS->ALT_MFP1 |= SYS_ALT_MFP1_PB3_TM3_EXT;
+
+    /* Set ALT MPF2 settings for TMR3 external capture */
+    SYS->ALT_MFP2 &= ~(SYS_ALT_MFP2_PB3_Msk);
+    SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB3_TM3_EXT;
 }
 
 void Initial_Timer2_Toggle(void)
