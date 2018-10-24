@@ -174,7 +174,7 @@ void AdcSingleCycleScanModeTest()
 /* MAIN function                                                                                           */
 /*---------------------------------------------------------------------------------------------------------*/
 
-main(void)
+int32_t main(void)
 {
 
     /* Unlock protected registers */

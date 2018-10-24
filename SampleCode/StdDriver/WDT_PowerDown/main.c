@@ -96,7 +96,7 @@ void SYS_Init(void)
     CLK_EnableModuleClock(WDT_MODULE);    
         
     /* Select WDT module clock source */
-    CLK_SetModuleClock(WDT_MODULE, CLK_CLKSEL1_WDT_S_LIRC, NULL);
+    CLK_SetModuleClock(WDT_MODULE, CLK_CLKSEL1_WDT_S_LIRC, 0);
 
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init I/O Multi-function                                                                                 */

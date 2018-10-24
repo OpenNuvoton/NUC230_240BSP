@@ -460,14 +460,14 @@ void HID_MSC_ClassRequest(void)
 #define SECTOR_SIZE      4096
 #define START_SECTOR     0x10
 
-typedef __packed struct {
+typedef struct {
     uint8_t u8Cmd;
     uint8_t u8Size;
     uint32_t u32Arg1;
     uint32_t u32Arg2;
     uint32_t u32Signature;
     uint32_t u32Checksum;
-}CMD_T;
+} __attribute__((packed)) CMD_T;
 
 CMD_T gCmd;    
 
@@ -1524,6 +1524,7 @@ void MSC_AckCmd(void)
                 g_sCSW.bCSWStatus = 0;
                 break;
             }
+
             case UFI_READ_10:
             case UFI_READ_12:
             {
@@ -1532,7 +1533,24 @@ void MSC_AckCmd(void)
                     MSC_ReadTrig();
                     return;
                 }
+                if(g_sCBW.dCBWDataTransferLength > 36)
+                {
+                    // Stall EP2 after short packet
+                    //USBD_SET_EP_STALL(EP2);
+
+                    g_sCSW.dCSWDataResidue = g_sCBW.dCBWDataTransferLength - 36;
+                    g_sCSW.bCSWStatus = 0;
+                    DBG_PRINTF("Inquiry size > 36\n");
+                }
+                else
+                {
+                    g_sCSW.dCSWDataResidue = 0;
+                    g_sCSW.bCSWStatus = 0;
+                    DBG_PRINTF("Inquiry ack, %x\n", USBD->EP[4].CFGP);
+                }
+                break;
             }
+
             case UFI_REQUEST_SENSE:
             case UFI_INQUIRY:
             {

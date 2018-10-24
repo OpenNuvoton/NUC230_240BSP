@@ -29,13 +29,22 @@ int32_t IAP_Func3(int32_t n);
 
 #if defined ( __ICCARM__ )
 # pragma location = "FunTblSection" /* The location of FunTblSection is defined in FMC_IAP_LD.icf file. */
-__root const uint32_t g_funcTable[4] = {
+__root const uint32_t g_funcTable[4] =
+{
     (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
 } ;
 #else
-__attribute__((at(FUN_TBL_BASE))) const uint32_t g_funcTable[4] = {
+#if defined(__GNUC__)
+const uint32_t __attribute__((section (".IAPFunTable"))) g_funcTable[4] =
+{
     (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
 };
+#else
+__attribute__((at(FUN_TBL_BASE))) const uint32_t g_funcTable[4] =
+{
+    (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
+};
+#endif
 #endif
 
 
@@ -118,44 +127,63 @@ void UART0_Init(void)
 
 int32_t IAP_Func0(int32_t n)
 {
+#if defined(__GNUC__)
+    return (n * 1);
+#else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
+    for(i = 0; i < n; i++)
+    {
         printf("Hello IAP0! #%d\n", i);
     }
 
     return n;
+#endif    
 }
-
 int32_t IAP_Func1(int32_t n)
 {
+#if defined(__GNUC__)
+    return (n * 2);
+#else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP1! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP1! #%d\n", i);
     }
 
     return n;
+#endif    
 }
 int32_t IAP_Func2(int32_t n)
 {
+#if defined(__GNUC__)
+    return (n * 3);
+#else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP2! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP2! #%d\n", i);
     }
 
     return n;
+#endif    
 }
 int32_t IAP_Func3(int32_t n)
 {
+#if defined(__GNUC__)
+    return (n * 4);
+#else
     int32_t i;
 
-    for(i = 0; i < n; i++) {
-        printf("Hello IAP3! #%d\n", i);
+    for(i = 0; i < n; i++)
+    {
+    	printf("Hello IAP3! #%d\n", i);
     }
 
     return n;
+#endif    
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -168,6 +196,17 @@ int32_t main(void)
     /* Init System, IP clock and multi-function I/O */
     SYS_Init();
 
+#if defined(__GNUC_LD_IAP__)
+        
+    // Delay 3 seconds
+    for(i = 0; i < 30; i++)
+    {
+        SysTickDelay(10000);
+    }
+
+    while(SYS->PDID)__WFI();
+#else
+    
     /* Init UART0 for printf */
     UART0_Init();
 
@@ -177,14 +216,15 @@ int32_t main(void)
         The base address for function table is defined by FUN_TBL_BASE.
     */
 
-    printf("+------------------------------------------------------------------+\n");
+    printf("+-----------------------------------------------------------------------+\n");
     printf("|    NUC230_240 Flash Memory Controller Driver Sample Code for LDROM    |\n");
-    printf("+------------------------------------------------------------------+\n");
+    printf("+-----------------------------------------------------------------------+\n");
 
     printf("\nCPU @ %dHz\n\n", SystemCoreClock);
 
     // Delay 3 seconds
-    for(i = 0; i < 30; i++) {
+    for(i = 0; i < 30; i++)
+    {
         printf(".");
         SysTickDelay(10000);
     }
@@ -193,6 +233,7 @@ int32_t main(void)
     printf("Function table @ 0x%08x\n", g_funcTable);
 
     while(SYS->PDID)__WFI();
+#endif    
 }
 
 

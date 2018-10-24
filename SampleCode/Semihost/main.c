@@ -12,7 +12,9 @@
 
 #include <stdio.h>
 #include "NUC230_240.h"
-
+# if defined (__GNUC__)
+extern void initialise_monitor_handles(void);
+#endif
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Main Function                                                                                            */
@@ -21,6 +23,10 @@
 int32_t main()
 {
     int8_t item;
+
+# if defined (__GNUC__)
+    initialise_monitor_handles();
+#endif
 
     /*
         To enable semihost, user must define "DEBUG_ENABLE_SEMIHOST" constant when build code with M051Series BSP.
@@ -37,7 +43,8 @@ int32_t main()
 
     printf("\n Start SEMIHOST test: \n");
 
-    while(1) {
+    while(1)
+    {
         /* Get input character */
         item = getchar();
 
