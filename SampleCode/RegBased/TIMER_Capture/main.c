@@ -227,7 +227,7 @@ int main(void)
 
     /* Check TM2_EXT interrupt counts */
     u32Loop = 0;
-    while(g_au32TMRINTCount[2] <= 10) {
+    while(g_au32TMRINTCount[2] < 10) {
         if(g_au32TMRINTCount[2] != u32InitCount) {
             au32CAPValus[u32InitCount] = TIMER_GetCaptureData(TIMER2);
             printf("[%2d] - %4d\n", g_au32TMRINTCount[2], au32CAPValus[u32InitCount]);
