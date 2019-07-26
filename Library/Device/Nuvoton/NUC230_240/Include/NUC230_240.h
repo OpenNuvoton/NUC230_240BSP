@@ -11613,11 +11613,17 @@ typedef struct
 #define USBD_FADDR_FADDR_Msk     (0x7Ful << USBD_FADDR_FADDR_Pos)        /*!< USBD_T::FADDR: FADDR Mask */
 
 /* USBD EPSTS Bit Field Definitions */
+#define USBD_EPSTS_EPSTS7_Pos    29                                      /*!< USBD_T::EPSTS: EPSTS7 Position */
+#define USBD_EPSTS_EPSTS7_Msk    (7ul << USBD_EPSTS_EPSTS7_Pos)          /*!< USBD_T::EPSTS: EPSTS7 Mask */
+
+#define USBD_EPSTS_EPSTS6_Pos    26                                      /*!< USBD_T::EPSTS: EPSTS6 Position */
+#define USBD_EPSTS_EPSTS6_Msk    (7ul << USBD_EPSTS_EPSTS6_Pos)          /*!< USBD_T::EPSTS: EPSTS6 Mask */
+
 #define USBD_EPSTS_EPSTS5_Pos    23                                      /*!< USBD_T::EPSTS: EPSTS5 Position */
 #define USBD_EPSTS_EPSTS5_Msk    (7ul << USBD_EPSTS_EPSTS5_Pos)          /*!< USBD_T::EPSTS: EPSTS5 Mask */
 
 #define USBD_EPSTS_EPSTS4_Pos    20                                      /*!< USBD_T::EPSTS: EPSTS4 Position */
-#define USBD_EPSTS_EPSTS4_Msk    (7ul << USBD_EPSTS_EPSTS4_Pos)          /*!< USBD_T::EPSTS: EPSTS5 Mask */
+#define USBD_EPSTS_EPSTS4_Msk    (7ul << USBD_EPSTS_EPSTS4_Pos)          /*!< USBD_T::EPSTS: EPSTS4 Mask */
 
 #define USBD_EPSTS_EPSTS3_Pos    17                                      /*!< USBD_T::EPSTS: EPSTS3 Position */
 #define USBD_EPSTS_EPSTS3_Msk    (7ul << USBD_EPSTS_EPSTS3_Pos)          /*!< USBD_T::EPSTS: EPSTS3 Mask */
