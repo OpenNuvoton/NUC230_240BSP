@@ -12,8 +12,8 @@
 #include "NUC230_240.h"
 
 
-#define PLLCON_SETTING          (CLK_PLLCON_72MHz_HIRC)
-#define PLL_CLOCK               (720000000)
+#define PLLCON_SETTING          (CLK_PLLCON_72MHz_HXT)
+#define PLL_CLOCK               (72000000)
 #define HCLK_DIV                (1)
 
 #define GPIO_SETMODE(port, pin, u32Mode) port->MODE = (port->MODE & ~(0x3ul << (pin << 1))) | (u32Mode << (pin << 1));
@@ -95,7 +95,7 @@ void SYS_Init(void)
     
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    while(!(CLK->CLKSTATUS & CLK_PWRCON_XTL12M_EN_Msk));
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
