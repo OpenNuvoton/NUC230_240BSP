@@ -1,18 +1,14 @@
 /**************************************************************************//**
  * @file     can.h
- * @version  V3.00
- * $Revision: 3 $
- * $Date: 2/19/16 2:31p $
- * @brief    NUC230_240 Series CAN Driver Header File
+ * @version  V1.00
+ * @brief    M2351 Series CAN Driver Header File
  *
- * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright (C) 2016 Nuvoton Technology Corp. All rights reserved.
  *
  ******************************************************************************/
 #ifndef __CAN_H__
 #define __CAN_H__
 
-#include "NUC230_240.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -34,48 +30,55 @@ extern "C"
 /*---------------------------------------------------------------------------------------------------------*/
 /* CAN Test Mode Constant Definitions                                                                      */
 /*---------------------------------------------------------------------------------------------------------*/
-#define    CAN_NORMAL_MODE   0
-#define    CAN_BASIC_MODE    1
+#define    CAN_NORMAL_MODE   0U    /*!< CAN select normal mode */
+#define    CAN_BASIC_MODE    1U    /*!< CAN select basic mode */
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Message ID Type Constant Definitions                                                                    */
 /*---------------------------------------------------------------------------------------------------------*/
-#define    CAN_STD_ID    0
-#define    CAN_EXT_ID    1
+#define    CAN_STD_ID    0UL    /*!< CAN select standard ID */
+#define    CAN_EXT_ID    1UL    /*!< CAN select extended ID */
 
 /*---------------------------------------------------------------------------------------------------------*/
 /* Message Frame Type Constant Definitions                                                                 */
 /*---------------------------------------------------------------------------------------------------------*/
-#define    CAN_REMOTE_FRAME    0
-#define    CAN_DATA_FRAME    1
+#define    CAN_REMOTE_FRAME    0    /*!< CAN frame select remote frame */
+#define    CAN_DATA_FRAME    1      /*!< CAN frame select data frame */
 
 /*@}*/ /* end of group CAN_EXPORTED_CONSTANTS */
 
-/*---------------------------------------------------------------------------------------------------------*/
-/*  CAN message structure                                                                                  */
-/*---------------------------------------------------------------------------------------------------------*/
+
+/** @addtogroup CAN_EXPORTED_STRUCTS CAN Exported Structs
+  @{
+*/
+/**
+  * @details    CAN message structure
+  */
 typedef struct
 {
-    uint32_t  IdType;
-    uint32_t  FrameType;
-    uint32_t  Id;
-    uint8_t   DLC;
-    uint8_t   Data[8];
+    uint32_t  IdType;       /*!< ID type */
+    uint32_t  FrameType;    /*!< Frame type */
+    uint32_t  Id;           /*!< Message ID */
+    uint8_t   DLC;          /*!< Data length */
+    uint8_t   Data[8];      /*!< Data */
 } STR_CANMSG_T;
 
-/*---------------------------------------------------------------------------------------------------------*/
-/*  CAN mask message structure                                                                             */
-/*---------------------------------------------------------------------------------------------------------*/
+/**
+  * @details    CAN mask message structure
+  */
 typedef struct
 {
-    uint8_t   u8Xtd;
-    uint8_t   u8Dir;
-    uint32_t  u32Id;
-    uint8_t   u8IdType;
+    uint8_t   u8Xtd;      /*!< Extended ID */
+    uint8_t   u8Dir;      /*!< Direction */
+    uint32_t  u32Id;      /*!< Message ID */
+    uint8_t   u8IdType;   /*!< ID type*/
 } STR_CANMASK_T;
 
-#define MSG(id)  (id)
+/*@}*/ /* end of group CAN_EXPORTED_STRUCTS */
 
+/** @cond HIDDEN_SYMBOLS */
+#define MSG(id)  (id)
+/** @endcond HIDDEN_SYMBOLS */
 
 /** @addtogroup CAN_EXPORTED_FUNCTIONS CAN Exported Functions
   @{
@@ -125,7 +128,7 @@ typedef struct
  *
  * @details User can wake-up system when there is a falling edge in the CAN_Rx pin.
  */
-#define CAN_ENABLE_WAKEUP(can) ((can)->WU_EN = CAN_WUEN_WAKUP_EN_Msk)
+#define CAN_ENABLE_WAKEUP(can) ((can)->WU_EN = CAN_WU_EN_WAKUP_EN_Msk)
 
 /**
  * @brief Get specified Message Object new data into bit value.
@@ -145,18 +148,32 @@ typedef struct
 /* Define CAN functions prototype                                                                          */
 /*---------------------------------------------------------------------------------------------------------*/
 uint32_t CAN_SetBaudRate(CAN_T *tCAN, uint32_t u32BaudRate);
-uint32_t CAN_Open(CAN_T *tCAN, uint32_t u32BaudRate, uint32_t u32Mode);
 void CAN_Close(CAN_T *tCAN);
+uint32_t CAN_Open(CAN_T *tCAN, uint32_t u32BaudRate, uint32_t u32Mode);
 void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum);
 void CAN_EnableInt(CAN_T *tCAN, uint32_t u32Mask);
 void CAN_DisableInt(CAN_T *tCAN, uint32_t u32Mask);
-int32_t CAN_Transmit(CAN_T *tCAN, uint32_t u32MsgNum , STR_CANMSG_T* pCanMsg);
-int32_t CAN_Receive(CAN_T *tCAN, uint32_t u32MsgNum , STR_CANMSG_T* pCanMsg);
-int32_t CAN_SetMultiRxMsg(CAN_T *tCAN, uint32_t u32MsgNum , uint32_t u32MsgCount, uint32_t u32IDType, uint32_t u32ID);
-int32_t CAN_SetRxMsg(CAN_T *tCAN, uint32_t u32MsgNum , uint32_t u32IDType, uint32_t u32ID);
-int32_t CAN_SetRxMsgAndMsk(CAN_T *tCAN, uint32_t u32MsgNum , uint32_t u32IDType, uint32_t u32ID, uint32_t u32IDMask);
-int32_t CAN_SetTxMsg(CAN_T *tCAN, uint32_t u32MsgNum , STR_CANMSG_T* pCanMsg);
+int32_t CAN_Transmit(CAN_T *tCAN, uint32_t u32MsgNum, STR_CANMSG_T* pCanMsg);
+int32_t CAN_Receive(CAN_T *tCAN, uint32_t u32MsgNum, STR_CANMSG_T* pCanMsg);
+int32_t CAN_SetMultiRxMsg(CAN_T *tCAN, uint32_t u32MsgNum, uint32_t u32MsgCount, uint32_t u32IDType, uint32_t u32ID);
+int32_t CAN_SetRxMsg(CAN_T *tCAN, uint32_t u32MsgNum, uint32_t u32IDType, uint32_t u32ID);
+int32_t CAN_SetRxMsgAndMsk(CAN_T *tCAN, uint32_t u32MsgNum, uint32_t u32IDType, uint32_t u32ID, uint32_t u32IDMask);
+int32_t CAN_SetTxMsg(CAN_T *tCAN, uint32_t u32MsgNum, STR_CANMSG_T* pCanMsg);
 int32_t CAN_TriggerTxMsg(CAN_T  *tCAN, uint32_t u32MsgNum);
+void CAN_EnterInitMode(CAN_T *tCAN, uint8_t u8Mask);
+void CAN_LeaveInitMode(CAN_T *tCAN);
+void CAN_WaitMsg(CAN_T *tCAN);
+uint32_t CAN_GetCANBitRate(CAN_T *tCAN);
+void CAN_EnterTestMode(CAN_T *tCAN, uint8_t u8TestMask);
+void CAN_LeaveTestMode(CAN_T *tCAN);
+uint32_t CAN_IsNewDataReceived(CAN_T *tCAN, uint8_t u8MsgObj);
+int32_t CAN_BasicSendMsg(CAN_T *tCAN, STR_CANMSG_T* pCanMsg);
+int32_t CAN_BasicReceiveMsg(CAN_T *tCAN, STR_CANMSG_T* pCanMsg);
+int32_t CAN_SetRxMsgObjAndMsk(CAN_T *tCAN, uint8_t u8MsgObj, uint8_t u8idType, uint32_t u32id, uint32_t u32idmask, uint8_t u8singleOrFifoLast);
+int32_t CAN_SetRxMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, uint8_t u8idType, uint32_t u32id, uint8_t u8singleOrFifoLast);
+int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, uint8_t u8Release, STR_CANMSG_T* pCanMsg);
+int32_t CAN_SetRemoteRxMsgObjAndMsk(CAN_T *tCAN, uint8_t u8MsgObj, uint8_t u8idType, uint32_t u32id, uint32_t u32idmask, uint8_t *pu8Buff, int32_t size, uint8_t u8singleOrFifoLast);
+int32_t CAN_SetRemoteTxMsg(CAN_T *tCAN, uint32_t u32MsgNum, STR_CANMSG_T* pCanMsg);
 
 
 /*@}*/ /* end of group CAN_EXPORTED_FUNCTIONS */
@@ -169,6 +186,6 @@ int32_t CAN_TriggerTxMsg(CAN_T  *tCAN, uint32_t u32MsgNum);
 }
 #endif
 
-#endif //__CAN_H__
+#endif /* __CAN_H__ */
 
-/*** (C) COPYRIGHT 2014 Nuvoton Technology Corp. ***/
+/*** (C) COPYRIGHT 2016 Nuvoton Technology Corp. ***/
