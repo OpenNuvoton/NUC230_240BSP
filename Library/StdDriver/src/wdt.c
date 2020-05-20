@@ -6,6 +6,7 @@
  * @brief    NUC230_240 series WDT driver source file
  *
  * @note
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2013 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include "NUC230_240.h"

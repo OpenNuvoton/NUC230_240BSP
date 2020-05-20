@@ -6,6 +6,7 @@
  * @brief    NUC230_240 Series Clock Control Driver Header File
  *
  * @note
+ * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  *
  ******************************************************************************/
