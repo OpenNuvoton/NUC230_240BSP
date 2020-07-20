@@ -150,9 +150,6 @@ int32_t main(void)
     while(1)
     {
         MSC_ProcessCmd();
-#ifdef NONBLOCK_PRINTF
-        putchar(0); // Flush the data in software FIFO to UART
-#endif
     }
 }
 
