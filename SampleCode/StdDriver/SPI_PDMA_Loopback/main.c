@@ -225,11 +225,9 @@ void SpiLoopTest_WithPDMA(void)
     PDMA_Trigger(SPI_MASTER_RX_DMA_CH);
     
     /* Enable SPI slave DMA function */
-    SPI_TRIGGER_RX_PDMA(SPI1);
-    SPI_TRIGGER_TX_PDMA(SPI1);
+    SPI_TRIGGER_TX_RX_PDMA(SPI1);
     /* Enable SPI master DMA function */
-    SPI_TRIGGER_TX_PDMA(SPI0);
-    SPI_TRIGGER_RX_PDMA(SPI0);
+    SPI_TRIGGER_TX_RX_PDMA(SPI0);
     
     /* Check Master RX DMA transfer done interrupt flag */
     while((PDMA_GET_CH_INT_STS(SPI_MASTER_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
