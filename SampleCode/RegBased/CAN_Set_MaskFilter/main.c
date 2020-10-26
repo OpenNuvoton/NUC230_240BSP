@@ -21,7 +21,7 @@
 /*---------------------------------------------------------------------------*/
 extern char GetChar(void);
 void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum);
-int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg);
+int32_t CAN_ReadMsgObject(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg);
 void CAN_MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR);
 void CAN_ResetIF(CAN_T *tCAN, uint8_t u8IF_Num);
 void CAN_ShowMsg(STR_CANMSG_T* Msg);
@@ -74,7 +74,7 @@ void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum)
 /*---------------------------------------------------------------------------------------------------------*/
 /* Gets the message                                                                                        */
 /*---------------------------------------------------------------------------------------------------------*/
-int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
+int32_t CAN_ReadMsgObject(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 {
     if(!CAN_GET_NEW_DATA_IN_BIT(tCAN, u8MsgObj)) {
         return FALSE;
@@ -127,17 +127,17 @@ void CAN_MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR)
 {
     if(u32IIDR == 1) {
         printf("Msg-0 INT and Callback\n");
-        CAN_ReadMsgObj(tCAN, 0, &rrMsg);
+        CAN_ReadMsgObject(tCAN, 0, &rrMsg);
         CAN_ShowMsg(&rrMsg);
     }
     if(u32IIDR == 5 + 1) {
         printf("Msg-5 INT and Callback \n");
-        CAN_ReadMsgObj(tCAN, 5, &rrMsg);
+        CAN_ReadMsgObject(tCAN, 5, &rrMsg);
         CAN_ShowMsg(&rrMsg);
     }
     if(u32IIDR == 31 + 1) {
         printf("Msg-31 INT and Callback \n");
-        CAN_ReadMsgObj(tCAN, 31, &rrMsg);
+        CAN_ReadMsgObject(tCAN, 31, &rrMsg);
         CAN_ShowMsg(&rrMsg);
     }
 }
