@@ -37,7 +37,7 @@ extern "C"
 */
 
 /* Global variables for Control Pipe */
-uint8_t g_usbd_SetupPacket[8] = {0};
+uint8_t g_usbd_SetupPacket[8] = {0};        /*!< Setup packet buffer */
 volatile uint8_t g_usbd_RemoteWakeupEn = 0; /*!< Remote wake up function enable flag */
 
 static volatile uint8_t *g_usbd_CtrlInPointer = 0;
@@ -136,9 +136,9 @@ void USBD_GetSetupPacket(uint8_t *buf)
 void USBD_ProcessSetupPacket(void)
 {
     g_usbd_CtrlOutToggle = 0;
-
     /* Get SETUP packet from USB buffer */
     USBD_MemCopy(g_usbd_SetupPacket, (uint8_t *)USBD_BUF_BASE, 8);
+
     /* Check the request type */
     switch(g_usbd_SetupPacket[0] & 0x60)
     {
@@ -227,15 +227,13 @@ void USBD_GetDescriptor(void)
         // Get HID Descriptor
         case DESC_HID:
         {
-            /* CV3.0 HID Class Descriptor Test, 
+            /* CV3.0 HID Class Descriptor Test,
                Need to indicate index of the HID Descriptor within gu8ConfigDescriptor, specifically HID Composite device. */
             uint32_t u32ConfigDescOffset;   // u32ConfigDescOffset is configuration descriptor offset (HID descriptor start index)
             u32Len = Minimum(u32Len, LEN_HID);
             DBG_PRINTF("Get HID desc, %d\n", u32Len);
-
             u32ConfigDescOffset = g_usbd_sInfo->gu32ConfigHidDescIdx[g_usbd_SetupPacket[4]];
             USBD_PrepareCtrlIn((uint8_t *)&g_usbd_sInfo->gu8ConfigDesc[u32ConfigDescOffset], u32Len);
-            
             USBD_PrepareCtrlOut(0, 0);
             break;
         }
@@ -251,7 +249,6 @@ void USBD_GetDescriptor(void)
                 }
             }
             USBD_PrepareCtrlIn((uint8_t *)g_usbd_sInfo->gu8HidReportDesc[g_usbd_SetupPacket[4]], u32Len);
-
             USBD_PrepareCtrlOut(0, 0);
             break;
         }
@@ -327,6 +324,9 @@ void USBD_StandardRequest(void)
             case GET_DESCRIPTOR:
             {
                 USBD_GetDescriptor();
+                /* Status stage */
+                USBD_PrepareCtrlOut(0, 0);
+                DBG_PRINTF("Get descriptor\n");
                 break;
             }
             case GET_INTERFACE:
@@ -563,7 +563,6 @@ void USBD_CtrlIn(void)
             USBD_SET_PAYLOAD_LEN(EP0, 0);
             g_usbd_CtrlInZeroFlag = 0;
         }
-        
         DBG_PRINTF("Ctrl In done.\n");
     }
 }
@@ -602,7 +601,6 @@ void USBD_CtrlOut(void)
     uint32_t u32Size;
 
     DBG_PRINTF("Ctrl Out Ack %d\n", g_usbd_CtrlOutSize);
-
     if(g_usbd_CtrlOutToggle != (USBD->EPSTS & USBD_EPSTS_EPSTS1_Msk))
     {
         g_usbd_CtrlOutToggle = USBD->EPSTS & USBD_EPSTS_EPSTS1_Msk;
@@ -636,7 +634,7 @@ void USBD_CtrlOut(void)
 void USBD_SwReset(void)
 {
     int i;
-    
+
     // Reset all variables for protocol
     g_usbd_CtrlInPointer = 0;
     g_usbd_CtrlInSize = 0;
@@ -708,8 +706,3 @@ void USBD_LockEpStall(uint32_t u32EpBitmap)
 #endif
 
 /*** (C) COPYRIGHT 2015 Nuvoton Technology Corp. ***/
-
-
-
-
-

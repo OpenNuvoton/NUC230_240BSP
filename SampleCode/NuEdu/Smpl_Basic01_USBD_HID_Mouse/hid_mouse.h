@@ -1,6 +1,6 @@
 /******************************************************************************
  * @file     usbd_hid.h
- * @brief    NANO100 series USB driver header file
+ * @brief    USB driver header file
  * @version  2.0.0
  * @date     22, March, 2013
  *
@@ -67,6 +67,8 @@ void HID_ClassRequest(void);
 
 void EP2_Handler(void);
 void HID_UpdateMouseData(void);
+
+extern uint8_t volatile g_u8Suspend;
 
 #endif  /* __USBD_HID_H_ */
 
