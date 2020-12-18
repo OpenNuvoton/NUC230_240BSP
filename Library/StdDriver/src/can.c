@@ -1,10 +1,10 @@
 /**************************************************************************//**
  * @file     can.c
- * @version  V1.00
+ * @version  V1.01
  * @brief    CAN driver source file
  *
- * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2016 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2016 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include "NUC230_240.h"
 
@@ -1168,11 +1168,11 @@ int32_t CAN_SetRxMsgAndMsk(CAN_T *tCAN, uint32_t u32MsgNum, uint32_t u32IDType, 
   */
 int32_t CAN_SetMultiRxMsg(CAN_T *tCAN, uint32_t u32MsgNum, uint32_t u32MsgCount, uint32_t u32IDType, uint32_t u32ID)
 {
-    uint32_t i = 0UL;
+    uint32_t i;
     uint32_t u32TimeOutCount;
     uint32_t u32EOB_Flag = 0UL;
 
-    for(i = 1UL; i < u32MsgCount; i++)
+    for(i = 1UL; i <= u32MsgCount; i++)
     {
         u32TimeOutCount = 0UL;
 
