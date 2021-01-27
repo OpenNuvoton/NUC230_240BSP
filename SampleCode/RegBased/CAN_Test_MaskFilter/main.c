@@ -21,10 +21,10 @@
 /*---------------------------------------------------------------------------*/
 extern char GetChar(void);
 void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum);
-int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg);
-void CAN_MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR);
-void CAN_ResetIF(CAN_T *tCAN, uint8_t u8IF_Num);
-void CAN_ShowMsg(STR_CANMSG_T* Msg);
+int32_t ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg);
+void MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR);
+void ResetIF(CAN_T *tCAN, uint8_t u8IF_Num);
+void ShowMsg(STR_CANMSG_T* Msg);
 void SYS_Init(void);
 void UART0_Init(void);
 void Note_Configure(void);
@@ -73,7 +73,7 @@ void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum)
 /*---------------------------------------------------------------------------------------------------------*/
 /* Gets the message                                                                                        */
 /*---------------------------------------------------------------------------------------------------------*/
-int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
+int32_t ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 {
     if(!CAN_GET_NEW_DATA_IN_BIT(tCAN, u8MsgObj)) {
         return FALSE;
@@ -122,22 +122,22 @@ int32_t CAN_ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 /*---------------------------------------------------------------------------------------------------------*/
 /* ISR to handle CAN interrupt event                                                                       */
 /*---------------------------------------------------------------------------------------------------------*/
-void CAN_MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR)
+void MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR)
 {
     if(u32IIDR == 1) {
         printf("Msg-0 INT and Callback\n");
-        CAN_ReadMsgObj(tCAN, 0, &rrMsg);
-        CAN_ShowMsg(&rrMsg);
+        ReadMsgObj(tCAN, 0, &rrMsg);
+        ShowMsg(&rrMsg);
     }
     if(u32IIDR == 5 + 1) {
         printf("Msg-5 INT and Callback \n");
-        CAN_ReadMsgObj(tCAN, 5, &rrMsg);
-        CAN_ShowMsg(&rrMsg);
+        ReadMsgObj(tCAN, 5, &rrMsg);
+        ShowMsg(&rrMsg);
     }
     if(u32IIDR == 31 + 1) {
         printf("Msg-31 INT and Callback \n");
-        CAN_ReadMsgObj(tCAN, 31, &rrMsg);
-        CAN_ShowMsg(&rrMsg);
+        ReadMsgObj(tCAN, 31, &rrMsg);
+        ShowMsg(&rrMsg);
     }
 }
 
@@ -179,7 +179,7 @@ void CAN0_IRQHandler(void)
     } else if(u8IIDRstatus != 0) {
         printf("=> Interrupt Pointer = %d\n", CAN0->IIDR - 1);
 
-        CAN_MsgInterrupt(CAN0, u8IIDRstatus);
+        MsgInterrupt(CAN0, u8IIDRstatus);
 
         CAN_CLR_INT_PENDING_BIT(CAN0, ((CAN0->IIDR) - 1)); /* Clear Interrupt Pending */
     } else if(CAN0->WU_STATUS == 1) {
@@ -228,7 +228,7 @@ void CAN1_IRQHandler(void)
     } else if(u8IIDRstatus != 0) {
         printf("=> Interrupt Pointer = %d\n", CAN1->IIDR - 1);
 
-        CAN_MsgInterrupt(CAN1, u8IIDRstatus);
+        MsgInterrupt(CAN1, u8IIDRstatus);
 
         CAN_CLR_INT_PENDING_BIT(CAN1, ((CAN1->IIDR) - 1)); /* Clear Interrupt Pending */
     } else if(CAN1->WU_STATUS == 1) {
@@ -243,7 +243,7 @@ void CAN1_IRQHandler(void)
 /*---------------------------------------------------------------------------------------------------------*/
 /* Reset message interface parameters                                                                      */
 /*---------------------------------------------------------------------------------------------------------*/
-void CAN_ResetIF(CAN_T *tCAN, uint8_t u8IF_Num)
+void ResetIF(CAN_T *tCAN, uint8_t u8IF_Num)
 {
     if(u8IF_Num > 1)
         return;
@@ -263,7 +263,7 @@ void CAN_ResetIF(CAN_T *tCAN, uint8_t u8IF_Num)
 /*---------------------------------------------------------------------------*/
 /*  Show Message Function                                                    */
 /*---------------------------------------------------------------------------*/
-void CAN_ShowMsg(STR_CANMSG_T* Msg)
+void ShowMsg(STR_CANMSG_T* Msg)
 {
     uint8_t i;
 
@@ -595,7 +595,7 @@ uint32_t CAN_SetTxRqst(CAN_T *tCAN, uint8_t u8MsgObj)
     STR_CANMSG_T rMsg;
 
     /* Gets the message */
-    CAN_ReadMsgObj(tCAN, u8MsgObj, &rMsg);
+    ReadMsgObj(tCAN, u8MsgObj, &rMsg);
 
     /* Access Transmission Request Bit */
     tCAN->IF[0].CMASK  = CAN_IF_CMASK_WRRD_Msk | CAN_IF_CMASK_TXRQSTNEWDAT_Msk ;
