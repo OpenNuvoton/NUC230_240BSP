@@ -32,8 +32,6 @@
 #define CONFIG_BASE      0x00300000
 #define DATA_FLASH_BASE  MASS_STORAGE_OFFSET
 
-int IsDebugFifoEmpty(void);
-
 /*--------------------------------------------------------------------------*/
 
 void EnableCLKO(uint32_t u32ClkSrc, uint32_t u32ClkDiv)
@@ -115,9 +113,6 @@ void PowerDown()
     /* Unlock protected registers */
     SYS_UnlockReg();
 
-    printf("Enter power down ...\n");
-    while(!IsDebugFifoEmpty());
-
     /* Wakeup Enable */
     USBD_ENABLE_INT(USBD_INTEN_WAKEUP_EN_Msk);
 
@@ -126,8 +121,6 @@ void PowerDown()
     /* Clear PWR_DOWN_EN if it is not clear by itself */
     if(CLK->PWRCON & CLK_PWRCON_PWR_DOWN_EN_Msk)
         CLK->PWRCON ^= CLK_PWRCON_PWR_DOWN_EN_Msk;
-
-    printf("device wakeup!\n");
 
     /* Lock protected registers */
     SYS_LockReg();

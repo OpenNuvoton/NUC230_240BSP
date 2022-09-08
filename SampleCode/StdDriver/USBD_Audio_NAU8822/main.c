@@ -147,11 +147,11 @@ int32_t main(void)
     /* Initial UART0 for debug message */
     UART0_Init();
 
-    /* Init I2C0 to access WAU8822 */
+    /* Init I2C0 to access NAU8822 */
     I2C0_Init();
 
-    /* Initialize WAU8822 codec */
-    WAU8822_Setup();
+    /* Initialize NAU8822 codec */
+    NAU8822_Setup();
 
     I2S_Open(I2S, I2S_MODE_SLAVE, PLAY_RATE, I2S_DATABIT_16, I2S_STEREO, I2S_FORMAT_I2S);
 
@@ -210,7 +210,7 @@ int32_t main(void)
             ch = getchar();
             u32Data = u32Data * 16 + ((ch >= '0' && ch <= '9') ? ch - '0' : ch - 'a' + 10);
             printf("%03x\n", u32Data);
-            I2C_WriteWAU8822(u32Reg,  u32Data);
+            I2C_WriteNAU8822(u32Reg,  u32Data);
         }
 
     }
