@@ -6,8 +6,9 @@
  * @brief    NUC230_240 Series UART Interface Controller Driver Sample Code
  *
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"
@@ -183,7 +184,7 @@ uint8_t Get_Key_Input(void)
 
 void TMR0_IRQHandler(void)
 {
-    TimerCounter == (TimerCounter++);
+	  TimerCounter = TimerCounter+1;
     // clear Timer0 interrupt flag
     TIMER_ClearIntFlag(TIMER0);
 }

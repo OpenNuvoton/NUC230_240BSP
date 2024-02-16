@@ -6,8 +6,9 @@
  * @brief    NUC230_240 Series Flash Memory Controller Driver Sample Code
  *
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"
@@ -15,7 +16,7 @@
 #define PLLCON_SETTING      CLK_PLLCON_72MHz_HXT
 #define PLL_CLOCK           72000000
 
-#if !defined(__ICCARM__) && !defined(__GNUC__)
+#if defined(__ARMCC_VERSION)
 extern uint32_t Image$$RO$$Base;
 #endif
 
@@ -114,11 +115,18 @@ int32_t main(void)
 
         To use this sample code, please:
         1. Build all targets and download to device individually. The targets are:
-            FMC_MultiBoot, RO=0x0
-            FMC_Boot0, RO=0x2000
-            FMC_Boot1, RO=0x4000
-            FMC_Boot2, RO=0x6000
-            FMC_Boot3, RO=0x8000
+           For Keil/IAR project,
+               FMC_MultiBoot, RO=0x0
+               FMC_Boot0, RO=0x1000
+               FMC_Boot1, RO=0x2000
+               FMC_Boot2, RO=0x3000
+               FMC_Boot3, RO=0x100000
+           For GCC project,
+               FMC_MultiBoot, RO=0x0
+               FMC_Boot0, RO=0x2000
+               FMC_Boot1, RO=0x4000
+               FMC_Boot2, RO=0x6000
+               FMC_Boot3, RO=0x0x100000
         2. Reset MCU to execute FMC_MultiBoot.
 
     */
@@ -130,35 +138,17 @@ int32_t main(void)
 
     printf("\nCPU @ %dHz\n\n", SystemCoreClock);
 
-#if defined(__BASE__)
-    printf("Boot from 0\n");
-#endif
-#if defined(__BOOT0__)
-    printf("Boot from 0x2000\n");
-#endif
-#if defined(__BOOT1__)
-    printf("Boot from 0x4000\n");
-#endif
-#if defined(__BOOT2__)
-    printf("Boot from 0x6000\n");
-#endif
-#if defined(__BOOT3__)
-    printf("Boot from 0x8000\n");
-#endif
-
-#if defined(__ICCARM__) || defined(__GNUC__)
-    printf("VECMAP = 0x%x\n", FMC_GetVECMAP());
-#else
+#if defined(__ARMCC_VERSION)
     printf("Current RO Base = 0x%x, VECMAP = 0x%x\n", (uint32_t)&Image$$RO$$Base, FMC_GetVECMAP());
+#elif defined(__ICCARM__) || defined(__GNUC__)
+    printf("VECMAP = 0x%x\n", FMC_GetVECMAP());
 #endif
 
     /* Check IAP mode */
     u32Cfg = FMC_Read(FMC_CONFIG_BASE);
-    if((u32Cfg & 0xc0) != 0x80)
-    {
+    if((u32Cfg & 0xc0) != 0x80) {
         printf("Do you want to set to new IAP mode (APROM boot + LDROM)?\n");
-        if(getchar() == 'y')
-        {
+        if(getchar() == 'y') {
             FMC->ISPCON |= FMC_ISPCON_CFGUEN_Msk; /* Enable user configuration update */
 
             /* Set CBS to b'10 */
@@ -173,40 +163,65 @@ int32_t main(void)
             getchar();
             SYS->IPRSTC1 = 0x1; /* Reset MCU */
             while(1);
-        }
-        else
-        {
+        } else {
             printf("VECMAP only valid in new IAP mode. CBS = 10'b or 00'b\n");
             goto lexit;
         }
     }
 
+#if (defined(__ARMCC_VERSION) || defined(__ICCARM__))
+    printf("Select one boot image: \n");
+    printf("[0] Boot 0, base = 0x1000\n");
+    printf("[1] Boot 1, base = 0x2000\n");
+    printf("[2] Boot 2, base = 0x3000\n");
+    printf("[3] Boot 3, base = 0x100000\n");
+    printf("[Others] Boot, base = 0x0\n");
+
+    ch = getchar();
+    switch(ch) {
+    case '0':
+        FMC_SetVectorPageAddr(0x1000);
+        break;
+    case '1':
+        FMC_SetVectorPageAddr(0x2000);
+        break;
+    case '2':
+        FMC_SetVectorPageAddr(0x3000);
+        break;
+    case '3':
+        FMC_SetVectorPageAddr(0x100000);
+        break;
+    default:
+        FMC_SetVectorPageAddr(0x0);
+        break;
+    }
+#else
     printf("Select one boot image: \n");
     printf("[0] Boot 0, base = 0x2000\n");
     printf("[1] Boot 1, base = 0x4000\n");
     printf("[2] Boot 2, base = 0x6000\n");
-    printf("[3] Boot 3, base = 0x8000\n");
+    printf("[3] Boot 3, base = 0x100000\n");
     printf("[Others] Boot, base = 0x0\n");
 
     ch = getchar();
-    switch(ch)
-    {
-        case '0':
-            FMC_SetVectorPageAddr(0x2000);
-            break;
-        case '1':
-            FMC_SetVectorPageAddr(0x4000);
-            break;
-        case '2':
-            FMC_SetVectorPageAddr(0x6000);
-            break;
-        case '3':
-            FMC_SetVectorPageAddr(0x8000);
-            break;
-        default:
-            FMC_SetVectorPageAddr(0x0);
-            break;
+    switch(ch) {
+    case '0':
+        FMC_SetVectorPageAddr(0x2000);
+        break;
+    case '1':
+        FMC_SetVectorPageAddr(0x4000);
+        break;
+    case '2':
+        FMC_SetVectorPageAddr(0x6000);
+        break;
+    case '3':
+        FMC_SetVectorPageAddr(0x100000);
+        break;
+    default:
+        FMC_SetVectorPageAddr(0x0);
+        break;
     }
+#endif
 
     /* Reset CPU only to reset to new vector page */
     SYS->IPRSTC1 |= SYS_IPRSTC1_CPU_RST_Msk;

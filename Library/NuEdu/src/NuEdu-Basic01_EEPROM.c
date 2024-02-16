@@ -6,8 +6,9 @@
  * @brief    NUC200 Series EEPROM Library
  *
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NuEdu-Basic01_EEPROM.h"
@@ -50,7 +51,7 @@ void I2C1_IRQHandler(void)
 /*---------------------------------------------------------------------------------------------------------*/
 /*  I2C Initial Function                                                                                       */
 /*---------------------------------------------------------------------------------------------------------*/
-__INLINE void I2C_PIN_Init(void)
+__STATIC_INLINE void I2C_PIN_Init(void)
 {
     /* Set GPA10,11 multi-function pins for I2C1 SDA and SCL */
     SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA10_Msk | SYS_GPA_MFP_PA11_Msk);

@@ -7,8 +7,9 @@
  *           Configure I2S as Master mode and demonstrate how I2S works with PDMA.
  *           Both TX PDMA function and RX PDMA function will be enabled.
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include <string.h>

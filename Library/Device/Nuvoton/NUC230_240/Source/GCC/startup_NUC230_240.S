@@ -1,10 +1,10 @@
 /****************************************************************************//**
- * @file     startup_M0518.S
+ * @file     startup_NUC230_240.S
  * @version  V1.00
  * @brief    CMSIS Device Startup File
  *
- * SPDX-License-Identifier: Apache-2.0
- * @copyright (C) 2018 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 
 

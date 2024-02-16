@@ -6,8 +6,9 @@
  * @brief    NUC200 Series I2S Controller Sample Code
  *
  * @note
- * Copyright (C) 2011 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
  *
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"
@@ -49,7 +50,7 @@ int main(void)
         {
             for(i = 0; i < 10; i++)
             {
-                if(i < 9);
+                if(i < 9)
                 //led test
                 Write_LED_Bar(i);
                 //adc test
