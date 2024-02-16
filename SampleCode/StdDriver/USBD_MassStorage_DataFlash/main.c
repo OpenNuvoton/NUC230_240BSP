@@ -2,7 +2,8 @@
  * @file     main.c
  * @brief    Use embedded data flash as storage to implement a USB Mass-Storage device.
  * @note
- * Copyright (C) 2013 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
  ******************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"

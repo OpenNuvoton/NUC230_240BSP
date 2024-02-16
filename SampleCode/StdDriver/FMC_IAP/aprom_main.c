@@ -6,7 +6,8 @@
  * @brief    FMC APROM IAP sample for NUC230_240 series MCU
  *
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"
@@ -133,6 +134,7 @@ int main()
     uint32_t    u32Data;
     char *acBootMode[] = {"LDROM+IAP", "LDROM", "APROM+IAP", "APROM"};
     uint32_t u32CBS;
+    FUNC_PTR    *ResetFunc;
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -206,8 +208,20 @@ int main()
             /* Set VECMAP to LDROM for booting from LDROM */
             FMC_SetVectorPageAddr(FMC_LDROM_BASE);
 
-            /* Software reset to boot to LDROM */
-            NVIC_SystemReset();
+            ResetFunc = (FUNC_PTR *)M32(4);
+
+#if defined(__GNUC__)
+            /* Set Main Stack Pointer register of new boot */
+            __set_MSP(M32(FMC_Read(FMC_LDROM_BASE)));
+#else
+            /* Set Main Stack Pointer register of new boot */
+            __set_MSP(M32(0));
+#endif
+
+            /* Call reset handler of new boot */
+            ResetFunc();
+//            /* Software reset to boot to LDROM */
+//            NVIC_SystemReset();
 
             break;
 

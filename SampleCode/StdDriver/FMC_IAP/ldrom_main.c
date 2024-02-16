@@ -6,13 +6,15 @@
  * @brief    FMC LDROM IAP sample program for NUC230_240 series MCU
  *
  * @note
- * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright SPDX-License-Identifier: Apache-2.0
+ * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
 *****************************************************************************/
 #include <stdio.h>
 #include "NUC230_240.h"
 
 #define PLLCON_SETTING      CLK_PLLCON_72MHz_HXT
 #define PLL_CLOCK           72000000
+void ProcessHardFault(void){}
 
 void SYS_Init(void)
 {
@@ -124,7 +126,7 @@ int main()
     PutString("\n\nPress any key to branch to APROM...\n");
     GetChar();
 
-    PutString("\n\nChange VECMAP and branch to APROM...\n");
+    PutString("\n\nChange VECMAP and branch to LDROM...\n");
     UART_WAIT_TX_EMPTY(UART0);
 
     /* Mask all interrupt before changing VECMAP to avoid wrong interrupt handler fetched */
