@@ -1,13 +1,9 @@
 /******************************************************************************
  * @file     sc_intf.h
  * @version  V2.00
- * $Revision: 1 $
- * $Date: 14/10/01 5:08p $
- * @brief    NUC230_240 USBD CCID smartcard interface control header
- *
- * @note
+ * @brief    USBD CCID smartcard interface control header
  * @copyright SPDX-License-Identifier: Apache-2.0
- * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright Copyright (C) 2024 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #ifndef __SC_INTF_H__
 #define __SC_INTF_H__
@@ -64,7 +60,4 @@ uint8_t Intf_AbortTxRx(int32_t intf);
 #endif
 
 #endif // __SC_INTF_H__
-
-/*** (C) COPYRIGHT 2014 Nuvoton Technology Corp. ***/
-
 

@@ -1,20 +1,23 @@
 /**************************************************************************//**
  * @file     sclib.h
- * @version  V1.00
- * $Revision: 4 $
- * $Date: 15/08/20 11:06a $
+ * @version  V3.00
  * @brief    Smartcard library header file
  *
- * @note
  * @copyright SPDX-License-Identifier: Apache-2.0
- * @copyright Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
+ * @copyright Copyright (C) 2024 Nuvoton Technology Corp. All rights reserved.
  *****************************************************************************/
 #ifndef __SCLIB_H__
 #define __SCLIB_H__
 
 #include "NUC230_240.h"
 
-/** @addtogroup Library Library
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
+/** @addtogroup LIBRARY Library
   @{
 */
 
@@ -26,98 +29,74 @@
   @{
 */
 
+#define SCLIB_MAX_ATR_LEN                               32UL  /*!< Max ATR length. ISO-7816 8.2.1  \hideinitializer */
+#define SCLIB_MIN_ATR_LEN                                2UL  /*!< Min ATR length, TS and T0       \hideinitializer */
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+/* Protocol */
+#define SCLIB_PROTOCOL_UNDEFINED                0x00000000UL  /*!< There is no active protocol.    \hideinitializer */
+#define SCLIB_PROTOCOL_T0                       0x00000001UL  /*!< T=0 is the active protocol.     \hideinitializer */
+#define SCLIB_PROTOCOL_T1                       0x00000002UL  /*!< T=1 is the active protocol.     \hideinitializer */
 
-#define SCLIB_MAX_ATR_LEN       32  ///< Max ATR length. ISO-7816 8.2.1
-#define SCLIB_MIN_ATR_LEN        2  ///< Min ATR length, TS and T0
+#define SCLIB_SUCCESS                           0x00000000UL  /*!< Command successful without error \hideinitializer */
+/* error code generate by interrupt handler */
+#define SCLIB_ERR_CARD_REMOVED                  0x00000001UL  /*!< Smartcard removed               \hideinitializer */
+#define SCLIB_ERR_OVER_RUN                      0x00000002UL  /*!< Rx FIFO over run                \hideinitializer */
+#define SCLIB_ERR_PARITY_ERROR                  0x00000003UL  /*!< Tx/Rx parity error              \hideinitializer */
+#define SCLIB_ERR_NO_STOP                       0x00000004UL  /*!< Stop bit not found              \hideinitializer */
+#define SCLIB_ERR_SILENT_BYTE                   0x00000005UL  /*!< I/O pin stay at low for longer than 1 character time \hideinitializer */
+/*//#define SCLIB_ERR_CMD                           0x00000006UL */
+/*//#define SCLIB_ERR_UNSUPPORTEDCARD               0x00000007UL */
+#define SCLIB_ERR_READ                          0x00000008UL  /*!< Smartcard read error            \hideinitializer */
+#define SCLIB_ERR_WRITE                         0x00000009UL  /*!< Smartcard write error           \hideinitializer */
+#define SCLIB_ERR_TIME0OUT                      0x0000000AUL  /*!< Smartcard timer 0 timeout       \hideinitializer */
+#define SCLIB_ERR_TIME1OUT                      0x0000000BUL  /*!< Smartcard timer 1 timeout       \hideinitializer */
+#define SCLIB_ERR_TIME2OUT                      0x0000000CUL  /*!< Smartcard timer 2 timeout       \hideinitializer */
+#define SCLIB_ERR_AUTOCONVENTION                0x0000000DUL  /*!< Smartcard is neither direct nor inverse convention \hideinitializer */
+#define SCLIB_ERR_CLOCK                         0x0000000EUL  /*!< Smartcard clock frequency is not between 1MHz and 5 MHz \hideinitializer */
+/*//#define SCLIB_ERR_BGTIMEOUT                     0x0000000EUL */
+/* error code generate while parsing ATR and process PPS */
+#define SCLIB_ERR_ATR_UNRECOGNIZED              0x00001001UL  /*!< Unrecognized ATR                \hideinitializer */
+#define SCLIB_ERR_ATR_INVALID_PARAM             0x00001002UL  /*!< ATR parsing interface bytes error \hideinitializer */
+#define SCLIB_ERR_ATR_INVALID_TCK               0x00001003UL  /*!< TCK check byte error            \hideinitializer */
+#define SCLIB_ERR_PPS                           0x00001004UL  /*!< PPS error                       \hideinitializer */
+/* error code for T=1 protocol */
+#define SCLIB_ERR_T1_PARITY                     0x00002001UL  /*!< T=1 Parity Error Notice         \hideinitializer */
+#define SCLIB_ERR_T1_ICC                        0x00002002UL  /*!< ICC communication error         \hideinitializer */
+#define SCLIB_ERR_T1_PROTOCOL                   0x00002003UL  /*!< T=1 Protocol Error              \hideinitializer */
+#define SCLIB_ERR_T1_ABORT_RECEIVED             0x00002004UL  /*!< Received ABORT request          \hideinitializer */
+#define SCLIB_ERR_T1_RESYNCH_RECEIVED           0x00002005UL  /*!< Received RESYNCH request        \hideinitializer */
+#define SCLIB_ERR_T1_VPP_ERROR_RECEIVED         0x00002006UL  /*!< Received VPP error              \hideinitializer */
+#define SCLIB_ERR_T1_WTXRES_RECEIVED            0x00002007UL  /*!< Received BWT extension request  \hideinitializer */
+#define SCLIB_ERR_T1_IFSRES_RECEIVED            0x00002008UL  /*!< Received max IFS offer          \hideinitializer */
+#define SCLIB_ERR_T1_ABORTRES_RECEIVED          0x00002009UL  /*!< Received ABORT response         \hideinitializer */
+#define SCLIB_ERR_T1_CHECKSUM                   0x0000200AUL  /*!< T=1 block check sum error       \hideinitializer */
 
-// Protocol
-#define SCLIB_PROTOCOL_UNDEFINED                0x00000000  ///< There is no active protocol.
-#define SCLIB_PROTOCOL_T0                       0x00000001  ///< T=0 is the active protocol.
-#define SCLIB_PROTOCOL_T1                       0x00000002  ///< T=1 is the active protocol.
+/* error code for T=0 protocol */
+#define SCLIB_ERR_T0_PROTOCOL                   0x00003003UL  /*!< T=0 Protocol Error              \hideinitializer */
 
-#define SCLIB_SUCCESS                           0x00000000  ///< Command successful without error
-// error code generate by interrupt handler
-#define SCLIB_ERR_CARD_REMOVED                  0x00000001  ///< Smartcard removed
-#define SCLIB_ERR_OVER_RUN                      0x00000002  ///< Rx FIFO over run
-#define SCLIB_ERR_PARITY_ERROR                  0x00000003  ///< Tx/Rx parity error
-#define SCLIB_ERR_NO_STOP                       0x00000004  ///< Stop bit not found
-#define SCLIB_ERR_SILENT_BYTE                   0x00000005  ///< I/O pin stay at low for longer than 1 character time
-#define SCLIB_ERR_CMD                           0x00000006
-#define SCLIB_ERR_UNSUPPORTEDCARD               0x00000007
-#define SCLIB_ERR_READ                          0x00000008
-#define SCLIB_ERR_WRITE                         0x00000009
-#define SCLIB_ERR_TIME0OUT                      0x0000000A  ///< Smartcard timer 0 timeout
-#define SCLIB_ERR_TIME1OUT                      0x0000000B  ///< Smartcard timer 1 timeout
-#define SCLIB_ERR_TIME2OUT                      0x0000000C  ///< Smartcard timer 2 timeout
-#define SCLIB_ERR_AUTOCONVENTION                0x0000000D  ///< Smartcard is neither direct nor inverse convention
-#define SCLIB_ERR_CLOCK                         0x0000000E  ///< Smartcard clock frequency is not between 1MHz and 5 MHz
-#define SCLIB_ERR_BGTIMEOUT                     0x0000000E
-// error code generate while parsing ATR and process PPS
-#define SCLIB_ERR_ATR_UNRECOGNIZED              0x00001001  ///< Unrecognized ATR
-#define SCLIB_ERR_ATR_INVALID_PARAM             0x00001002  ///< ATR parsing interface bytes error
-#define SCLIB_ERR_ATR_INVALID_TCK               0x00001003  ///< TCK check byte error
-#define SCLIB_ERR_PPS                           0x00001004
-// error code for T=1 protocol
-#define SCLIB_ERR_T1_PARITY                     0x00002001            ///< T=1 Parity Error Notice
-#define SCLIB_ERR_T1_ICC                        0x00002002           ///< ICC communication error
-#define SCLIB_ERR_T1_PROTOCOL                   0x00002003  ///< T=1 Protocol Error
-#define SCLIB_ERR_T1_ABORT_RECEIVED             0x00002004  ///< Received ABORT request
-#define SCLIB_ERR_T1_RESYNCH_RECEIVED           0x00002005  ///< Received RESYNCH request
-#define SCLIB_ERR_T1_VPP_ERROR_RECEIVED         0x00002006  ///< Received VPP error
-#define SCLIB_ERR_T1_WTXRES_RECEIVED            0x00002007  ///< Received BWT extension request
-#define SCLIB_ERR_T1_IFSRES_RECEIVED            0x00002008  ///< Received max IFS offer
-#define SCLIB_ERR_T1_ABORTRES_RECEIVED          0x00002009  ///< Received ABORT response
-#define SCLIB_ERR_T1_CHECKSUM                   0x0000200A  ///< T=1 block check sum error
+/* error code indicates application control flow error */
+#define SCLIB_ERR_DEACTIVE                      0x0000F001UL  /*!< Smartcard is deactivate         \hideinitializer */
+#define SCLIB_ERR_CARDBUSY                      0x0000F002UL  /*!< Smartcard is busy, previous transmission is not complete yet \hideinitializer */
 
-// error code for T=0 protocol
-#define SCLIB_ERR_T0_PROTOCOL                   0x00003003      ///< T=0 Protocol Error
+/*@}*/ /* end of group SCLIB_EXPORTED_CONSTANTS */
 
-// error code indicates application control flow error
-#define SCLIB_ERR_DEACTIVE                      0x0000F001      ///< Smartcard is deactivation
-#define SCLIB_ERR_CARDBUSY                      0x0000F002      ///< Smartcard is busy, previous transmission is not complete yet
-
-/*@}*/ /* end of group NUC400_SCLIB_EXPORTED_CONSTANTS */
-
-/** @addtogroup NUC400_SCLIB_EXPORTED_STRUCTS Smartcard Library Exported Structs
+/** @addtogroup SCLIB_EXPORTED_STRUCTS Smartcard Library Exported Structs
   @{
 */
 
 /**
   * @brief  A structure holds smartcard information
   */
-typedef struct {
-    uint32_t T;                         ///< Protocol, ether \ref SCLIB_PROTOCOL_T0 or \ref SCLIB_PROTOCOL_T1.
-    uint32_t ATR_Len;                   ///< ATR length, between SCLIB_MAX_ATR_LEN and SCLIB_MIN_ATR_LEN
-    uint8_t ATR_Buf[SCLIB_MAX_ATR_LEN]; ///< Buffer holds ATR answered by smartcard
-} SCLIB_CARD_INFO_T;
-
-/**
-  * @brief  A structure holds smartcard attribute, including convention, guard time, waiting time, IFCS... etc.
-  */
 typedef struct
 {
-    uint8_t Fi;        ///< Findex;
-    uint8_t Di;        ///< Dindex;
-    uint8_t conv;      ///< Convention, direct or inverse. 0 direct, 1 inverse
-    uint8_t chksum;    ///< Checksum type
-    uint8_t GT;        ///< Guard Time
-    uint8_t WI;        ///< Wait integer for T0
-    uint8_t BWI;       ///< Block waiting integer for T1;
-    uint8_t CWI;       ///< Character waiting integer for T1;
-    uint8_t clkStop;   ///< Card clock stop status. 00 Not allowed, 01 low, 02, high, 03 ether high or low
-    uint8_t IFSC;      ///< size of negotiated IFCS
-    uint8_t NAD;       ///< NAD value
-} SCLIB_CARD_ATTRIB_T;
+    uint32_t T;                         /*!< Protocol, ether \ref SCLIB_PROTOCOL_T0 or \ref SCLIB_PROTOCOL_T1.  */
+    uint32_t ATR_Len;                   /*!< ATR length, between SCLIB_MAX_ATR_LEN and SCLIB_MIN_ATR_LEN.       */
+    uint8_t ATR_Buf[SCLIB_MAX_ATR_LEN]; /*!< Buffer holds ATR answered by smartcard.                            */
+} SCLIB_CARD_INFO_T;
 
+/*@}*/ /* end of group SCLIB_EXPORTED_STRUCTS */
 
-/*@}*/ /* end of group NUC400_SCLIB_EXPORTED_STRUCTS */
-
-/** @addtogroup NUC400_SCLIB_EXPORTED_FUNCTIONS Smartcard Library Exported Functions
+/** @addtogroup SCLIB_EXPORTED_FUNCTIONS Smartcard Library Exported Functions
   @{
 */
 
@@ -134,6 +113,7 @@ typedef struct
   *       calling this API, otherwise this API return with \ref SCLIB_ERR_CLOCK error code.
   * @note EMV book 1 is stricter than ISO-7816 on ATR checking. Enable EMV check iff the
   *       application supports EMV cards only.
+  * @note If EMVCheck is set \ref TRUE, this API will call \ref SCLIB_SetIFSD to set IFSD if necessary.
   */
 int32_t SCLIB_Activate(uint32_t num, uint32_t u32EMVCheck);
 
@@ -151,7 +131,8 @@ int32_t SCLIB_Activate(uint32_t num, uint32_t u32EMVCheck);
   *       calling this API, otherwise this API return with \ref SCLIB_ERR_CLOCK error code.
   * @note EMV book 1 is stricter than ISO-7816 on ATR checking. Enable EMV check iff the
   *       application supports EMV cards only.
-  * @note Only use this function instead of \ref SCLIB_Activate if there's large capacitor on VCC pin and 
+  * @note If EMVCheck is set \ref TRUE, this API will call \ref SCLIB_SetIFSD to set IFSD if necessary.
+  * @note Only use this function instead of \ref SCLIB_Activate if there's large capacitor on VCC pin and
   *       VCC raise slowly.
   */
 int32_t SCLIB_ActivateDelay(uint32_t num, uint32_t u32EMVCheck, uint32_t u32Delay);
@@ -193,18 +174,6 @@ void SCLIB_Deactivate(uint32_t num);
   * @retval SCLIB_ERR_DEACTIVE         Card is deactivated, s_info does not contains card information
   */
 int32_t SCLIB_GetCardInfo(uint32_t num, SCLIB_CARD_INFO_T *s_info);
-
-
-/**
-  * @brief Get the card attribute (e.g., Fi, Di, convention, guard time... etc. ) after activation success
-  * @param[in] num Smartcard interface number. From 0 ~ ( \ref SC_INTERFACE_NUM - 1)
-  * @param[out] s_attrib A pointer to \ref SCLIB_CARD_ATTRIB_T holds the card information
-  * @return Success or not
-  * @retval SCLIB_SUCCESS              Success, s_info contains card information
-  * @retval SCLIB_ERR_CARD_REMOVED     Card removed, s_info does not contains card information
-  * @retval SCLIB_ERR_DEACTIVE         Card is deactivated, s_info does not contains card information
-  */
-int32_t SCLIB_GetCardAttrib(uint32_t num, SCLIB_CARD_ATTRIB_T *s_attrib);
 
 /**
   * @brief Start a smartcard transmission.
@@ -250,7 +219,6 @@ void SCLIB_RequestTimeExtension(uint32_t u32Protocol);
 #else
 __weak void SCLIB_RequestTimeExtension(uint32_t u32Protocol);
 #endif
-
 /**
   * @brief Process card detect event in IRQ handler
   * @param[in] num Smartcard interface number. From 0 ~ ( \ref SC_INTERFACE_NUM - 1)
@@ -291,17 +259,35 @@ uint32_t SCLIB_CheckTxRxEvent(uint32_t num);
   */
 uint32_t SCLIB_CheckErrorEvent(uint32_t num);
 
+/**
+  * @brief Activate a smartcard without historical bytes check, this function can be called if
+  *        \ref SCLIB_Activate or \ref SCLIB_ActivateDelay return an error
+  * @param[in] num Smartcard interface number. From 0 ~ ( \ref SC_INTERFACE_NUM - 1)
+  * @return Smartcard reset success or not
+  * @retval SCLIB_SUCCESS Smartcard reset success
+  * @retval Others Smartcard reset failed
+  */
+int32_t SCLIB_ResetAnyway(uint32_t num);
+
+/**
+  * @brief Set a specific baud rate to catch ATR for a card which is not compatible with ISO-7816, 
+  *        this function should be called before \ref SCLIB_Activate or \ref SCLIB_ActivateDelay
+  * @param[in] num Smartcard interface number. From 0 ~ ( \ref SC_INTERFACE_NUM - 1)
+  * @param[in] br ATR default baud rate should be 9600 according to ISO-7816
+  * @return Baud rate set success or not
+  * @retval SCLIB_SUCCESS set ATR baud rate success
+  * @retval Others set ATR baud rate failed
+  */
+int32_t SCLIB_SetSpecificAtrBR(uint32_t num, uint32_t br);
+
+/*@}*/ /* end of group SCLIB_EXPORTED_FUNCTIONS */
+
+/*@}*/ /* end of group SCLIB */
+
+/*@}*/ /* end of group LIBRARY */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //__SCLIB_H__
-
-/*@}*/ /* end of group SCLIB_EXPORTED_FUNCTIONS */
-
-/*@}*/ /* end of group SC_Library */
-
-/*@}*/ /* end of group Library */
-
-/*** (C) COPYRIGHT 2013 Nuvoton Technology Corp. ***/
+#endif /* __SCLIB_H__ */

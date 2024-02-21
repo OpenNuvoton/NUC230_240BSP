@@ -74,9 +74,23 @@ void SC_ClearFIFO(SC_T *sc)
   */
 void SC_Close(SC_T *sc)
 {
+    uint32_t u32TimeOutCount;
+
     sc->IER = 0;
+
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->PINCSR & SC_PINCSR_SYNC_Msk) == SC_PINCSR_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0UL) break;
+    }
     sc->PINCSR = 0;
     sc->ALTCTL = 0;
+
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->CTL & SC_CTL_SYNC_Msk) == SC_CTL_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0UL) break;
+    }
     sc->CTL = 0;
 }
 
@@ -95,7 +109,7 @@ void SC_Close(SC_T *sc)
   */
 void SC_Open(SC_T *sc, uint32_t u32CD, uint32_t u32PWR)
 {
-    uint32_t u32Reg = 0, u32Intf;
+    uint32_t u32Reg = 0UL, u32Intf, u32TimeOutCount;
 
     if(sc == SC0)
         u32Intf = 0;
@@ -113,9 +127,19 @@ void SC_Open(SC_T *sc, uint32_t u32CD, uint32_t u32PWR)
     {
         u32CardStateIgnore[u32Intf] = 1;
     }
-    while(sc->PINCSR & SC_PINCSR_SYNC_Msk);
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->PINCSR & SC_PINCSR_SYNC_Msk) == SC_PINCSR_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0UL) break;
+    }
     u32Reg |= u32PWR ? 0 : SC_PINCSR_POW_INV_Msk;
     sc->PINCSR = u32Reg;
+
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->CTL & SC_CTL_SYNC_Msk) == SC_CTL_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0UL) break;
+    }
     sc->CTL = SC_CTL_SC_CEN_Msk;
 }
 
@@ -127,7 +151,7 @@ void SC_Open(SC_T *sc, uint32_t u32CD, uint32_t u32PWR)
   */
 void SC_ResetReader(SC_T *sc)
 {
-    uint32_t u32Intf;
+    uint32_t u32Intf, u32TimeOutCount;
 
     if(sc == SC0)
         u32Intf = 0;
@@ -139,8 +163,17 @@ void SC_ResetReader(SC_T *sc)
     // Reset FIFO
     sc->ALTCTL |= (SC_ALTCTL_TX_RST_Msk | SC_ALTCTL_RX_RST_Msk);
     // Set Rx trigger level to 1 character, longest card detect debounce period, disable error retry (EMV ATR does not use error retry)
-    while(sc->CTL & SC_CTL_SYNC_Msk);
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->CTL & SC_CTL_SYNC_Msk) == SC_CTL_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0) break;
+    }
     sc->CTL &= ~(SC_CTL_RX_FTRI_LEV_Msk | SC_CTL_CD_DEB_SEL_Msk | SC_CTL_TX_ERETRY_Msk | SC_CTL_RX_ERETRY_Msk);
+    u32TimeOutCount = SC_TIMEOUT;
+    while((sc->CTL & SC_CTL_SYNC_Msk) == SC_CTL_SYNC_Msk)
+    {
+        if(--u32TimeOutCount == 0) break;
+    }
     // Enable auto convention, and all three smartcard internal timers
     sc->CTL |= SC_CTL_AUTO_CON_EN_Msk | SC_CTL_TMR_SEL_Msk;
     // Disable Rx timeout
@@ -194,6 +227,7 @@ void SC_SetBlockGuardTime(SC_T *sc, uint32_t u32BGT)
   */
 void SC_SetCharGuardTime(SC_T *sc, uint32_t u32CGT)
 {
+    /* CGT is "START bit" + "8-bits" + "Parity bit" + "STOP bit(s)" + "EGT counts" */
     u32CGT -= sc->CTL & SC_CTL_SLEN_Msk ? 11 : 12;
     sc->EGTR = u32CGT;
 }
@@ -271,7 +305,62 @@ void SC_StopTimer(SC_T *sc, uint32_t u32TimerNum)
         sc->ALTCTL &= ~SC_ALTCTL_TMR2_SEN_Msk;
 }
 
+/**
+  * @brief      Get smartcard clock frequency
+  *
+  * @param[in]  sc      The pointer of smartcard module.
+  *
+  * @return     Smartcard frequency in kHZ
+  *
+  * @details    This function is used to get specified smartcard module clock frequency in kHz.
+  */
+uint32_t SC_GetInterfaceClock(SC_T *sc)
+{
+    uint32_t num, u32ClkSrc, freq;
 
+    /* Get smartcard module clock source and divider */
+    if(sc == SC0)
+    {
+        num = 0UL;
+    }
+    else if(sc == SC1)
+    {
+        num = 1UL;
+    }
+    else if(sc == SC2)
+    {
+        num = 2UL;
+    }
+    else
+    {
+        num = 0UL;
+    }
+
+    if(num == 0)
+        u32ClkSrc = (CLK->CLKSEL3 & CLK_CLKSEL3_SC0_S_Msk) >> CLK_CLKSEL3_SC0_S_Pos;
+    else if(num == 1)
+        u32ClkSrc = (CLK->CLKSEL3 & CLK_CLKSEL3_SC1_S_Msk) >> CLK_CLKSEL3_SC1_S_Pos;
+    else // SC2
+        u32ClkSrc = (CLK->CLKSEL3 & CLK_CLKSEL3_SC2_S_Msk) >> CLK_CLKSEL3_SC2_S_Pos;
+
+    if(u32ClkSrc == 0)
+        freq = __HXT;
+    else if(u32ClkSrc == 1)
+        freq = CLK_GetPLLClockFreq();
+    else if(u32ClkSrc == 2)
+        freq = SystemCoreClock;
+    else
+        freq = __HIRC;
+
+    if(num == 0)
+        freq /= ((CLK->CLKDIV1 & CLK_CLKDIV1_SC0_N_Msk) + 1);
+    else if(num == 1)
+        freq /= (((CLK->CLKDIV1 & CLK_CLKDIV1_SC1_N_Msk) >> CLK_CLKDIV1_SC1_N_Pos) + 1);
+    else // SC2
+        freq /= (((CLK->CLKDIV1 & CLK_CLKDIV1_SC2_N_Msk) >> CLK_CLKDIV1_SC2_N_Pos) + 1);
+
+    return (freq / 1000);
+}
 
 /*@}*/ /* end of group SC_EXPORTED_FUNCTIONS */
 
