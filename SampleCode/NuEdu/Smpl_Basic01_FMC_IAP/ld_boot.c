@@ -3,7 +3,7 @@
  * @version  V1.00
  * $Revision: 3 $
  * $Date: 15/09/02 11:56a $
- * @brief    FMC VECMAP sample program (LDROM code) for NANO100 series MCU
+ * @brief    FMC VECMAP sample program (LDROM code)
  *
  * @note
  * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
@@ -13,16 +13,8 @@
 #include "NUC230_240.h"
 #include "map.h"
 #include "NuEdu-Basic01.h"
-#define PLL_CLOCK           48000000
-#ifdef __ARMCC_VERSION
-__asm __INLINE __set_SP(uint32_t _sp)
-{
-    MSR MSP, r0
-    BX lr
-}
-#endif
 
-__INLINE void BranchTo(uint32_t u32Address)
+__STATIC_INLINE void BranchTo(uint32_t u32Address)
 {
     FUNC_PTR        *func;
     FMC_SetVectorPageAddr(u32Address);
@@ -30,7 +22,7 @@ __INLINE void BranchTo(uint32_t u32Address)
     printf("branch to address 0x%x\n", (int)func);
     printf("\n\nChange VECMAP and branch to user application...\n");
     while(!(UART0->FSR & UART_FSR_TX_EMPTY_Msk));
-    __set_SP(*(uint32_t *)u32Address);
+    __set_MSP(*(uint32_t *)u32Address);
     func();
 }
 void SYS_Init(void)
@@ -57,7 +49,7 @@ void SYS_Init(void)
     CLK_WaitClockReady(CLK_CLKSTATUS_XTL12M_STB_Msk);
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /* Lock protected registers */

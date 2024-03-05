@@ -24,6 +24,7 @@
 
 #include <assert.h>
 #include <inttypes.h>
+#include "NUC230_240.h"
 
 #define INLINE
 #define PR_BEGIN_EXTERN_C           extern "C" {
