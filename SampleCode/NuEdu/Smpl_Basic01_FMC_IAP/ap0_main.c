@@ -1,9 +1,9 @@
 /**************************************************************************//**
- * @file     ap_main.c
+ * @file     ap0_main.c
  * @version  V1.00
  * $Revision: 2 $
  * $Date: 15/08/18 11:54a $
- * @brief    FMC VECMAP sample program (loader) for Nano100 series MCU
+ * @brief    FMC VECMAP sample program (ap0 code)
  *
  * @note
  * Copyright (C) 2014 Nuvoton Technology Corp. All rights reserved.
@@ -16,7 +16,7 @@
 
 static int  load_image_to_flash(uint32_t image_base, uint32_t image_limit, uint32_t flash_addr, uint32_t max_size);
 int IsDebugFifoEmpty(void);
-volatile uint32_t const VersionNumber __attribute__((at(0x1000 + USER_AP0_ENTRY))) = 0x00001;
+volatile uint32_t const __attribute__((section(".ARM.__at_0x1000"))) VersionNumbe = 0x00001;
 
 void TMR0_IRQHandler(void)
 {
@@ -28,14 +28,8 @@ void TMR0_IRQHandler(void)
     TIMER_ClearIntFlag(TIMER0);
 
 }
-#ifdef __ARMCC_VERSION
-__asm __INLINE __set_SP(uint32_t _sp)
-{
-    MSR MSP, r0
-    BX lr
-}
-#endif
-__INLINE void BranchTo(uint32_t u32Address)
+
+__STATIC_INLINE void BranchTo(uint32_t u32Address)
 {
     FUNC_PTR        *func;
     FMC_SetVectorPageAddr(u32Address);
@@ -43,7 +37,7 @@ __INLINE void BranchTo(uint32_t u32Address)
     printf("branch to address 0x%x\n", (int)func);
     printf("\n\nChange VECMAP and branch to user application...\n");
     while(!IsDebugFifoEmpty());
-    __set_SP(*(uint32_t *)u32Address);
+    __set_MSP(*(uint32_t *)u32Address);
     func();
 }
 
@@ -75,7 +69,7 @@ void SYS_Init(void)
     CLK_SetCoreClock(PLL_CLOCK);
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /* Lock protected registers */
@@ -163,7 +157,7 @@ int32_t main(void)
             ch = getchar();
             if((ch == 'Y') || (ch == 'y'))
             {
-                printf("Writing fmc_isp.bin image to APROM address 0x%x...\n", USER_AP1_ENTRY);
+                printf("Writing fmc_ap1_main.bin image to APROM address 0x%x...\n", USER_AP1_ENTRY);
                 FMC_EnableAPUpdate();
                 if(load_image_to_flash((uint32_t)&loaderImage2Base, (uint32_t)&loaderImage2Limit,
                                        USER_AP1_ENTRY, USER_AP1_MAX_SIZE) != 0)

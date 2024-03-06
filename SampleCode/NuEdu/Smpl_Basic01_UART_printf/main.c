@@ -36,7 +36,7 @@ void SYS_Init(void)
     CLK_EnableModuleClock(UART0_MODULE);
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     SystemCoreClockUpdate();
 
     /*---------------------------------------------------------------------------------------------------------*/
@@ -57,7 +57,7 @@ void SYS_Init(void)
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
-/*  Simple printf() function                                                                                          */
+/*  Simple printf() function                                                                               */
 /*---------------------------------------------------------------------------------------------------------*/
 void printf_UART(uint8_t *str, ...);
 void printInteger(uint32_t u32Temp)
@@ -168,9 +168,9 @@ int main()
         if(u32Key & 0x01)
         {
             LED_On(i);
-            printf_UART("+------------------------------+\n");
-            printf_UART("|  Simple printf function:%d   |\n", i--);
-            printf_UART("+------------------------------+\n");
+            printf_UART((uint8_t *)"+------------------------------+\n");
+            printf_UART((uint8_t *)"|  Simple printf function:%d   |\n", i--);
+            printf_UART((uint8_t *)"+------------------------------+\n");
         }
     }
 }
