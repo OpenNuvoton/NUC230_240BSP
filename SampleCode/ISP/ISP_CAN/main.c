@@ -88,33 +88,41 @@ void CAN0_IRQHandler(void)
     }
 }
 
-void SYS_Init(void)
+int32_t SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
+
     /* Enable Internal and External RC clock */
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk | CLK_PWRCON_XTL12M_EN_Msk;
 
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+        if(--u32TimeOutCnt == 0) return -1;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
 
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+        if(--u32TimeOutCnt == 0) return -1;
 
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
     CLK->CLKDIV &= ~CLK_CLKDIV_HCLK_N_Msk;
     CLK->CLKDIV |= CLK_CLKDIV_HCLK(HCLK_DIV);
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;                        // PLL
     SystemCoreClock = PLL_CLOCK / HCLK_DIV;             // HCLK
-    CyclesPerUs     = SystemCoreClock / 1000000;        // For SYS_SysTickDelay()
+    CyclesPerUs     = SystemCoreClock / 1000000;        // For CLK_SysTickDelay()
+
+    return 0;
 }
 
 /*----------------------------------------------------------------------------*/
-/*  Tx Msg by Normal Mode Function (With Message RAM)                    */
+/*  Tx Msg by Normal Mode Function (With Message RAM)                         */
 /*----------------------------------------------------------------------------*/
 void CAN_Package_ACK(CAN_T *tCAN)
 {
@@ -166,7 +174,7 @@ int main(void)
     /* Unlock protected registers */
     SYS_UnlockReg();
     /* Init System, IP clock and multi-function I/O */
-    SYS_Init();
+    if( SYS_Init() < 0 ) goto _APROM;
     /* Enable FMC ISP function */
     FMC_Open();
     FMC_ENABLE_AP_UPDATE();
@@ -237,7 +245,9 @@ _APROM:
 }
 
 void ProcessHardFault()
-{}
+{
+    while(1); /* Halt here if hard fault occurs. */
+}
 
 void SH_Return()
 {}

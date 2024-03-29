@@ -354,6 +354,8 @@ void TestItem(void)
 /*----------------------------------------------------------------------------*/
 void Test_NormalMode_Rx(CAN_T *tCAN)
 {
+    uint32_t u32TimeOutCnt;
+
     if(CAN_SetRxMsg(tCAN, MSG(0), CAN_STD_ID, 0x7FF) == FALSE) {
         printf("Set Rx Msg Object failed\n");
         return;
@@ -372,7 +374,13 @@ void Test_NormalMode_Rx(CAN_T *tCAN)
 #if 1
     /* Polling Mode */
     while(1) {
-        while(tCAN->IIDR == 0);                  /* Wait IDR is changed */
+        u32TimeOutCnt = CAN_TIMEOUT;
+        while(tCAN->IIDR == 0) {                  /* Wait IDR is changed */
+            if(--u32TimeOutCnt == 0) {
+                printf("Wait for CAN IDR is changed time-out!\n");
+                return;
+            }
+        }
         printf("IDR = %x\n", tCAN->IIDR);
         CAN_Receive(tCAN, tCAN->IIDR - 1, &rrMsg); /* Get the message */
         CAN_ShowMsg(&rrMsg);                     /* Show the message object */

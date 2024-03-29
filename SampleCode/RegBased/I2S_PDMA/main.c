@@ -32,7 +32,7 @@ uint32_t g_au32RxBuffer[TEST_COUNT];
 /*---------------------------------------------------------------------------------------------------------*/
 int32_t main(void)
 {
-    uint32_t u32DataCount;
+    uint32_t u32DataCount, u32TimeOutCnt;
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -120,12 +120,28 @@ int32_t main(void)
     I2S->CON |= (I2S_CON_RXDMA_Msk | I2S_CON_TXDMA_Msk | I2S_CON_RXEN_Msk | I2S_CON_TXEN_Msk);
     
     /* Check I2S RX DMA transfer done interrupt flag */
-    while((PDMA2->ISR & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA2->ISR & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for I2S RX DMA transfer done interrupt flag time-out!");
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA2->ISR = PDMA_ISR_BLKD_IF_Msk;
     
     /* Check I2S TX DMA transfer done interrupt flag */
-    while((PDMA3->ISR & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA3->ISR & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for I2S TX DMA transfer done interrupt flag time-out!");
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA3->ISR = PDMA_ISR_BLKD_IF_Msk;
 
@@ -137,7 +153,8 @@ int32_t main(void)
     {
         printf("%d:\t0x%X\n", u32DataCount, g_au32RxBuffer[u32DataCount]);
     }
-    
+
+lexit:
     printf("\n\nExit I2S sample code.\n");
     
     /* Disable PDMA peripheral clock */

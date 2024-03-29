@@ -89,7 +89,7 @@ void SYS_Init(void)
 
     /* Waiting for Internal RC clock ready */
     CLK_WaitClockReady(CLK_CLKSTATUS_OSC22M_STB_Msk);
-    
+
     /* Enable external 12 MHz XTAL */
     CLK_EnableXtalRC(CLK_PWRCON_XTL12M_EN_Msk);
 
@@ -98,7 +98,7 @@ void SYS_Init(void)
 
     /* Set core clock rate as 72 MHz from PLL */
     CLK_SetCoreClock(72000000);
-    
+
     /* Select HXT as the clock source of UART */
     CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART_S_HXT, CLK_CLKDIV_UART(1));
 
@@ -137,10 +137,14 @@ void SYS_Init(void)
 
 void PowerDownFunction(void)
 {
+    uint32_t u32TimeOutCnt;
+
     printf("\nSystem enter power-down mode ... ");
 
     /* To check if all the debug messages are finished */
-    while(IsDebugFifoEmpty() == 0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while(IsDebugFifoEmpty() == 0)
+        if(--u32TimeOutCnt == 0) break;
 
     /* Deep sleep mode is selected */
     SCB->SCR = SCB_SCR_SLEEPDEEP_Msk;

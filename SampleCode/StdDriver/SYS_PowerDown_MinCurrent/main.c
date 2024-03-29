@@ -270,7 +270,7 @@ int32_t main(void)
 
     /*
         To measure Power-down current:
-        On NuMaker-NUC240V V1.0 board, remove components, e.g. Nu-Link2-Me and R7..
+        On NuMaker-NUC240V V1.0 board, remove components, e.g. Nu-Link2-Me and R7.
         Remove R16 and then user can measure target chip power consumption by AMMETER connector.
     */
 
@@ -285,7 +285,7 @@ int32_t main(void)
     SYS->ALT_MFP1 = 0;
     SYS->ALT_MFP2 = 0;
 
-    /* Configure all GPIO as Quasi-bidirectional Mode. They are default ouyput high. */
+    /* Configure all GPIO as Quasi-bidirectional Mode. They are default output high. */
     GPIO_SetMode(PA, GPIO_P0_TO_P15, GPIO_PMD_QUASI);
     GPIO_SetMode(PB, GPIO_P0_TO_P15, GPIO_PMD_QUASI);
     GPIO_SetMode(PC, GPIO_P0_TO_P15, GPIO_PMD_QUASI);

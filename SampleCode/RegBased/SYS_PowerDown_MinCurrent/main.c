@@ -74,7 +74,7 @@ void PowerDownFunction(void)
     /* Set system Power-down enabled and Power-down entry condition */
     CLK->PWRCON |= (CLK_PWRCON_PWR_DOWN_EN_Msk | CLK_PWRCON_PD_WAIT_CPU_Msk);
 
-    /* Chip enter Power-down mode after CPU run WFI instruction */    
+    /* Chip enter Power-down mode after CPU run WFI instruction */
     __WFI();
 }
 

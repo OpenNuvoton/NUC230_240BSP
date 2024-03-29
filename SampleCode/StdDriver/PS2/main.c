@@ -119,7 +119,7 @@ void PS2_IRQHandler(void)
                     PS2_SET_DATA_HIGH();
                     PS2_ENABLE_OVERRIDE();
 
-                    while(1);
+                    return;
                 }
 
             } else if(g_cmd[0] == PS2CMD_SET_RESOLUTION) {
@@ -142,7 +142,7 @@ void PS2_IRQHandler(void)
                     PS2_SET_DATA_HIGH();
                     PS2_ENABLE_OVERRIDE();
 
-                    while(1);
+                    return;
                 }
             }
         } else {
@@ -312,7 +312,7 @@ void SYS_Init(void)
     /* Enable UART module clock */
     CLK_EnableModuleClock(UART0_MODULE);
 
-    /* Enable UART module clock */
+    /* Enable PS2 module clock */
     CLK_EnableModuleClock(PS2_MODULE);
 
     /* Select IP clock source */

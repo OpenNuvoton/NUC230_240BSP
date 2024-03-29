@@ -182,19 +182,25 @@ void SCUART_SetTimeoutCnt(SC_T* sc, uint32_t u32TOC)
   * @param[in] sc The base address of smartcard module.
   * @param[in] pu8TxBuf The buffer containing data to send to transmit FIFO.
   * @param[in] u32WriteBytes Number of data to send.
-  * @return None
+  * @return Actual number of data put into SCUART Tx FIFO.
   * @details This function is to write data into transmit FIFO to send data out.
-  * @note This function blocks until all data write into FIFO.
   */
-void SCUART_Write(SC_T* sc, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
+uint32_t SCUART_Write(SC_T* sc, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
 {
-    uint32_t u32Count;
+    uint32_t u32Count, u32TimeOutCnt;
 
     for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
     {
-        while(SCUART_GET_TX_FULL(sc));  // Wait 'til FIFO not full
+        u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+        while(SCUART_GET_TX_FULL(sc))   // Wait 'til FIFO not full
+        {
+            if(--u32TimeOutCnt == 0)
+                return u32Count;
+        }
         sc->THR = pu8TxBuf[u32Count];    // Write 1 byte to FIFO
     }
+
+    return u32Count;
 }
 
 

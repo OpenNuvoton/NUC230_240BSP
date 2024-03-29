@@ -33,7 +33,7 @@ uint32_t g_au32RxBuffer[TEST_COUNT];
 int32_t main(void)
 {
     PDMA_T *pdma;
-    uint32_t u32DataCount;
+    uint32_t u32DataCount, u32TimeOutCnt;
 
     /* Unlock protected registers */
     SYS_UnlockReg();
@@ -114,14 +114,30 @@ int32_t main(void)
     I2S_ENABLE_RXDMA(I2S);
     
     /* Check I2S RX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(I2S_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(I2S_RX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for I2S RX DMA transfer done interrupt flag time-out!");
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(I2S_RX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
     /* Check I2S TX DMA transfer done interrupt flag */
-    while((PDMA_GET_CH_INT_STS(I2S_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0);
+    u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+    while((PDMA_GET_CH_INT_STS(I2S_TX_DMA_CH) & PDMA_ISR_BLKD_IF_Msk)==0)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for I2S TX DMA transfer done interrupt flag time-out!");
+            goto lexit;
+        }
+    }
     /* Clear the transfer done interrupt flag */
     PDMA_CLR_CH_INT_FLAG(I2S_TX_DMA_CH, PDMA_ISR_BLKD_IF_Msk);
-    
+
     /* Disable RX function and TX function */
     I2S_DISABLE_RX(I2S);
     I2S_DISABLE_TX(I2S);
@@ -131,7 +147,8 @@ int32_t main(void)
     {
         printf("%d:\t0x%X\n", u32DataCount, g_au32RxBuffer[u32DataCount]);
     }
-    
+
+lexit:
     printf("\n\nExit I2S sample code.\n");
     
     /* Disable PDMA peripheral clock */

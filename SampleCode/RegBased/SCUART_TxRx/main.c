@@ -63,14 +63,22 @@ uint32_t SCUART_Open(SC_T* sc, uint32_t u32baudrate)
 /*---------------------------------------------------------------------------------------------------------*/
 /* This function is to write data into transmit FIFO to send data out.                                     */
 /*---------------------------------------------------------------------------------------------------------*/
-void SCUART_Write(SC_T* sc, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
+uint32_t SCUART_Write(SC_T* sc, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
 {
-    uint32_t u32Count;
+    uint32_t u32Count, u32TimeOutCnt;;
 
     for(u32Count = 0; u32Count != u32WriteBytes; u32Count++) {
-        while(SCUART_GET_TX_FULL(sc));  // Wait 'til FIFO not full
-        sc->THR = pu8TxBuf[u32Count];    // Write 1 byte to FIFO
+
+        /* Wait 'til FIFO not full */
+        u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+        while(SCUART_GET_TX_FULL(sc))
+            if(--u32TimeOutCnt == 0) return u32Count;
+
+        /* Write 1 byte to FIFO */
+        sc->THR = pu8TxBuf[u32Count];
     }
+
+    return u32Count;
 }
 
 /*---------------------------------------------------------------------------------------------------------*/

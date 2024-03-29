@@ -32,7 +32,10 @@
  *                          It could be BIT0 ~ BIT15 for PA, PB, PC, PD and PE GPIO port.
  *                          It could be BIT0 ~ BIT3 for PF GPIO port.
  * @param[in]   u32Mode     Operation mode. . It could be \n
- *                          GPIO_PMD_INPUT, GPIO_PMD_OUTPUT, GPIO_PMD_OPEN_DRAIN, GPIO_PMD_QUASI.
+ *                          - \ref GPIO_PMD_INPUT
+ *                          - \ref GPIO_PMD_OUTPUT
+ *                          - \ref GPIO_PMD_OPEN_DRAIN
+ *                          - \ref GPIO_PMD_QUASI
  *
  * @return      None
  *
@@ -59,7 +62,11 @@ void GPIO_SetMode(GPIO_T *port, uint32_t u32PinMask, uint32_t u32Mode)
  *                              It could be 0 ~ 15 for PA, PB, PC, PD and PE GPIO port.
  *                              It could be 0 ~ 3 for PF GPIO port.
  * @param[in]   u32IntAttribs   The interrupt attribute of specified GPIO pin. It could be \n
- *                              GPIO_INT_RISING, GPIO_INT_FALLING, GPIO_INT_BOTH_EDGE, GPIO_INT_HIGH, GPIO_INT_LOW.
+ *                              - \ref GPIO_INT_RISING
+ *                              - \ref GPIO_INT_FALLING
+ *                              - \ref GPIO_INT_BOTH_EDGE
+ *                              - \ref GPIO_INT_HIGH
+ *                              - \ref GPIO_INT_LOW
  *
  * @return      None
  *

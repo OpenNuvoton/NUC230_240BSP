@@ -76,6 +76,8 @@ void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum)
 /*---------------------------------------------------------------------------------------------------------*/
 int32_t ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 {
+    uint32_t u32TimeOutCnt;
+
     if(!CAN_GET_NEW_DATA_IN_BIT(tCAN, u8MsgObj)) {
         return FALSE;
     }
@@ -93,8 +95,13 @@ int32_t ReadMsgObj(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 
     tCAN->IF[1].CREQ = 1 + u8MsgObj;
 
+    /*Wait*/
+    u32TimeOutCnt = CAN_TIMEOUT;
     while(tCAN->IF[1].CREQ & CAN_IF_CREQ_BUSY_Msk) {
-        /*Wait*/
+        if(--u32TimeOutCnt == 0) {
+            printf("Wait for CAN_IF1_CREQ register busy flag is cleared time-out!\n");
+            return FALSE;
+        }
     }
 
     if((tCAN->IF[1].ARB2 & CAN_IF_ARB2_XTD_Msk) == 0) {
@@ -306,11 +313,11 @@ void SYS_Init(void)
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CycylesPerUs automatically. */
+    /* User can use SystemCoreClockUpdate() to calculate PllClock, SystemCoreClock and CyclesPerUs automatically. */
     //SystemCoreClockUpdate();
     PllClock        = PLL_CLOCK;            // PLL
     SystemCoreClock = PLL_CLOCK / 1;        // HCLK
-    CyclesPerUs     = PLL_CLOCK / 1000000;  // For SYS_SysTickDelay()
+    CyclesPerUs     = PLL_CLOCK / 1000000;  // For CLK_SysTickDelay()
 
     /* Enable UART module clock */
     CLK->APBCLK |= CLK_APBCLK_UART0_EN_Msk;
@@ -415,6 +422,7 @@ void CAN_Init(CAN_T *tCAN, uint32_t u32kbps)
     uint8_t u8Tseg1, u8Tseg2;
     uint32_t u32Brp;
     uint32_t u32Value;
+    uint32_t u32TimeOutCnt;
 
     /* Set the CAN to enter initialization mode and enable access bit timing register */
     tCAN->CON |= CAN_CON_INIT_Msk;
@@ -454,8 +462,15 @@ void CAN_Init(CAN_T *tCAN, uint32_t u32kbps)
 
     /* Set the CAN to leave initialization mode */
     tCAN->CON &= (~(CAN_CON_INIT_Msk | CAN_CON_CCE_Msk));
-    while(tCAN->CON & CAN_CON_INIT_Msk); /* Check INIT bit is released */
 
+    /* Check INIT bit is released */
+    while(tCAN->CON & CAN_CON_INIT_Msk)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
+            printf("Wait for CAN to leave initialization mode time-out!\n");
+        }
+    }
 }
 
 /*----------------------------------------------------------------------------*/

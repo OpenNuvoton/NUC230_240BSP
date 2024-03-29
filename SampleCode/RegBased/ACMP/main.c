@@ -35,7 +35,7 @@ int32_t main(void)
 
     printf("\n\n");
     printf("+---------------------------------------+\n");
-    printf("|        NUC230_240 ACMP Sample Code        |\n");
+    printf("|      NUC230_240 ACMP Sample Code      |\n");
     printf("+---------------------------------------+\n");
 
     printf("\nThis sample code demonstrates ACMP0 function. Using ACMP0_P (PC.6) as ACMP0\n");
