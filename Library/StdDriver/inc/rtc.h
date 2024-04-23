@@ -247,7 +247,7 @@ uint32_t RTC_GetDayOfWeek(void);
 void RTC_SetTickPeriod(uint32_t u32TickSelection);
 void RTC_EnableInt(uint32_t u32IntFlagMask);
 void RTC_DisableInt(uint32_t u32IntFlagMask);
-void RTC_EnableSpareRegister(void);
+int32_t RTC_EnableSpareRegister(void);
 void RTC_DisableSpareRegister(void);
 void RTC_EnableSnooperDetection(uint32_t u32PinCondition);
 void RTC_DisableSnooperDetection(void);

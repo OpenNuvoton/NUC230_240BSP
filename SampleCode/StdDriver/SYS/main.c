@@ -3,7 +3,7 @@
  * @version  V2.00
  * $Revision: 3 $
  * $Date: 15/04/10 10:31a $
- * @brief    NUC230_240 Series UART Interface Controller Driver Sample Code
+ * @brief    NUC230_240 Series SYS Driver Sample Code
  *
  * @note
  * @copyright SPDX-License-Identifier: Apache-2.0

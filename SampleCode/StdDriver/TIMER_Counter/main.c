@@ -188,7 +188,7 @@ int main(void)
 
         if(--u32TimeOutCnt == 0){
             printf("Wait for Timer1 interrupt and counter value time-out!\n");
-            goto lexit;
+            break;
         }
     }
 

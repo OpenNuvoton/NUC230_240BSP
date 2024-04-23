@@ -500,7 +500,7 @@ void RTC_SetDate(uint32_t u32Year, uint32_t u32Month, uint32_t u32Day, uint32_t 
     /* Set Day of the Week */
     RTC->DWR = u32DayOfWeek & RTC_DWR_DWR_Msk;
 
-    /* Set RTC Calender Loading */
+    /* Set RTC Calendar Loading */
     RTC->CLR = (uint32_t)u32RegCLR;
 }
 
@@ -721,17 +721,26 @@ void RTC_DisableInt(uint32_t u32IntFlagMask)
   *
   * @param      None
   *
-  * @return     None
+  * @retval      0: SUCCESS
+  * @retval     -1: Enable spare register fail
   *
   * @details    This API is used to enable the spare register 0~19 can be accessed.
   */
-void RTC_EnableSpareRegister(void)
+int32_t RTC_EnableSpareRegister(void)
 {
+    uint32_t u32TimeOutCnt = RTC_TIMEOUT;
+
     RTC_WaitAccessEnable();
 
     RTC->SPRCTL |= RTC_SPRCTL_SPREN_Msk;
-    
-    while(!(RTC->SPRCTL & RTC_SPRCTL_SPRRDY_Msk));
+
+    while(!(RTC->SPRCTL & RTC_SPRCTL_SPRRDY_Msk))
+    {
+        if(--u32TimeOutCnt == 0)
+            return -1;
+    }
+
+    return 0;
 }
 
 /**

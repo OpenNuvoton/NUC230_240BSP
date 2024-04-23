@@ -71,7 +71,7 @@ void BuildSrcPattern(uint32_t u32Addr, uint32_t u32Length)
             *pAddr++ = (uint8_t)(j+i);
 
         i++;
-	} while ((loop !=0) || (u32Length !=0));
+    } while ((loop !=0) || (u32Length !=0));
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -211,7 +211,7 @@ void PDMA_UART(int32_t i32option)
         printf("  [Using TWO PDMA channel].\n");
         printf("  This sample code will use PDMA to do UART1 loopback test 10 times.\n");
         printf("  Please connect UART1_RXD(PB.4) <--> UART1_TXD(PB.5) before testing.\n");
-	    printf("  After connecting PB.4 <--> PB.5, press any key to start transfer.\n");
+        printf("  After connecting PB.4 <--> PB.5, press any key to start transfer.\n");
         g_u32TwoChannelPdmaTest = 1;
         getchar();
     }
@@ -244,7 +244,7 @@ void PDMA_UART(int32_t i32option)
 
     /* Enable PDMA Channel 0 Block Transfer Done Interrupt */
     PDMA0->IER |= PDMA_IER_BLKD_IE_Msk;
- 	IntCnt = 0;
+    IntCnt = 0;
     IsTestOver = FALSE;
     NVIC_EnableIRQ(PDMA_IRQn);
 
@@ -258,7 +258,7 @@ void PDMA_UART(int32_t i32option)
     /* Trigger PDMA */
     PDMA0->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
 
-	if(g_u32TwoChannelPdmaTest==1)
+    if(g_u32TwoChannelPdmaTest==1)
         PDMA1->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
 
     /* Enable UART Tx and Rx PDMA function */
@@ -281,7 +281,7 @@ void PDMA_UART(int32_t i32option)
     }
 
     /* Disable UART Tx and Rx PDMA function */
-	UART1->IER &= ~(UART_IER_DMA_TX_EN_Msk|UART_IER_DMA_RX_EN_Msk);
+    UART1->IER &= ~(UART_IER_DMA_TX_EN_Msk|UART_IER_DMA_RX_EN_Msk);
 
     /* Disable PDMA channel */
     PDMA_GCR->GCRCSR = 0;

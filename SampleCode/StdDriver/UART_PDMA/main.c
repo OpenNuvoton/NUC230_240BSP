@@ -54,7 +54,7 @@ void ClearBuf(uint32_t u32Addr, uint32_t u32Length, uint8_t u8Pattern)
 /*---------------------------------------------------------------------------------------------------------*/
 void BuildSrcPattern(uint32_t u32Addr, uint32_t u32Length)
 {
-    uint32_t i=0,j,loop;
+    uint32_t i=0, j, loop;
     uint8_t* pAddr;
 
     pAddr = (uint8_t *)u32Addr;
@@ -71,7 +71,7 @@ void BuildSrcPattern(uint32_t u32Addr, uint32_t u32Length)
             *pAddr++ = (uint8_t)(j+i);
 
         i++;
-	} while ((loop !=0) || (u32Length !=0));
+    } while ((loop !=0) || (u32Length !=0));
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -208,7 +208,7 @@ void PDMA_UART(int32_t i32option)
         printf("  [Using TWO PDMA channel].\n");
         printf("  This sample code will use PDMA to do UART1 loopback test 10 times.\n");
         printf("  Please connect UART1_RXD(PB.4) <--> UART1_TXD(PB.5) before testing.\n");
-	    printf("  After connecting PB.4 <--> PB.5, press any key to start transfer.\n");
+        printf("  After connecting PB.4 <--> PB.5, press any key to start transfer.\n");
         g_u32TwoChannelPdmaTest = 1;
         getchar();
     }

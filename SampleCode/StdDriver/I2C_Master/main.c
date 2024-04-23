@@ -425,11 +425,11 @@ int32_t main(void)
         and Byte Read operations, and check if the read data is equal to the programmed data.
     */
     printf("\n");
-    printf("+--------------------------------------------------------+\n");
+    printf("+------------------------------------------------------------+\n");
     printf("| NUC230_240 I2C Driver Sample Code(Master) for access Slave |\n");
-    printf("|                                                        |\n");
-    printf("| I2C Master (I2C0) <---> I2C Slave(I2C0)                |\n");
-    printf("+--------------------------------------------------------+\n");
+    printf("|                                                            |\n");
+    printf("| I2C Master (I2C0) <---> I2C Slave(I2C0)                    |\n");
+    printf("+------------------------------------------------------------+\n");
 
     printf("Configure I2C0 as a master.\n");
     printf("The I/O connection for I2C0:\n");

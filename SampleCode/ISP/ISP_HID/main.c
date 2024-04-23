@@ -45,7 +45,7 @@ int32_t SYS_Init(void)
     CLK->PLLCON = PLLCON_SETTING;
 
     u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
         if(--u32TimeOutCnt == 0) return -1;
 
     CLK->CLKDIV = (CLK->CLKDIV & (~CLK_CLKDIV_HCLK_N_Msk)) | CLK_CLKDIV_HCLK(2);

@@ -138,9 +138,9 @@ int main(void)
     UART0_Init();
 
     printf("\n\nCPU @ %dHz\n", SystemCoreClock);
-    printf("+--------------------------------+\n");
+    printf("+---------------------------------+\n");
     printf("|    CRC CCITT Mode Sample Code   |\n");
-    printf("+--------------------------------+\n\n");
+    printf("+---------------------------------+\n\n");
 
     printf("# Calculate string \"123456789\" CRC-CCITT checksum value by CRC DMA mode.\n");
     printf("    - Seed value is 0xFFFF          \n");

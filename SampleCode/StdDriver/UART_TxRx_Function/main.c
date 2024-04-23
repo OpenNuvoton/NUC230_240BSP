@@ -141,6 +141,7 @@ void UART_TEST_HANDLE()
 {
     uint8_t u8InChar = 0xFF;
     uint32_t u32IntSts = UART0->ISR;
+    uint32_t u32TimeOutCnt;
 
     /* Receive Data Available Interrupt Handle */
     if(u32IntSts & UART_ISR_RDA_INT_Msk) {
@@ -174,7 +175,9 @@ void UART_TEST_HANDLE()
         tmp = g_u32comRtail;
         if(g_u32comRhead != tmp) {
             u8InChar = g_u8RecData[g_u32comRhead];
-            while(UART_IS_TX_FULL(UART0));  /* Wait Tx is not full to transmit data */
+            u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
+            while(UART_IS_TX_FULL(UART0))    /* Wait Tx is not full to transmit data */
+                if(--u32TimeOutCnt == 0) break;
             UART_WRITE(UART0, u8InChar);
             g_u32comRhead = (g_u32comRhead == (RXBUFSIZE - 1)) ? 0 : (g_u32comRhead + 1);
             g_u32comRbytes--;
