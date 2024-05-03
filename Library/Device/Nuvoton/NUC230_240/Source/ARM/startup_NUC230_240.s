@@ -53,60 +53,60 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
 
                 ; External Interrupts
                                                   ; maximum of 32 External Interrupts are possible
-                DCD     BOD_IRQHandler  
-                DCD     WDT_IRQHandler  
+                DCD     BOD_IRQHandler
+                DCD     WDT_IRQHandler
                 DCD     EINT0_IRQHandler
                 DCD     EINT1_IRQHandler
-                DCD     GPAB_IRQHandler 
+                DCD     GPAB_IRQHandler
                 DCD     GPCDEF_IRQHandler
-                DCD     PWMA_IRQHandler 
-                DCD     PWMB_IRQHandler 
-                DCD     TMR0_IRQHandler 
-                DCD     TMR1_IRQHandler 
-                DCD     TMR2_IRQHandler 
-                DCD     TMR3_IRQHandler 
+                DCD     PWMA_IRQHandler
+                DCD     PWMB_IRQHandler
+                DCD     TMR0_IRQHandler
+                DCD     TMR1_IRQHandler
+                DCD     TMR2_IRQHandler
+                DCD     TMR3_IRQHandler
                 DCD     UART02_IRQHandler
                 DCD     UART1_IRQHandler
-                DCD     SPI0_IRQHandler 
-                DCD     SPI1_IRQHandler 
-                DCD     SPI2_IRQHandler 
-                DCD     SPI3_IRQHandler 
-                DCD     I2C0_IRQHandler 
-                DCD     I2C1_IRQHandler 
-                DCD     CAN0_IRQHandler 
+                DCD     SPI0_IRQHandler
+                DCD     SPI1_IRQHandler
+                DCD     SPI2_IRQHandler
+                DCD     SPI3_IRQHandler
+                DCD     I2C0_IRQHandler
+                DCD     I2C1_IRQHandler
+                DCD     CAN0_IRQHandler
                 DCD     CAN1_IRQHandler
-                DCD     SC012_IRQHandler 
-                DCD     USBD_IRQHandler  
-                DCD     PS2_IRQHandler  
-                DCD     ACMP_IRQHandler 
+                DCD     SC012_IRQHandler
+                DCD     USBD_IRQHandler
+                DCD     PS2_IRQHandler
+                DCD     ACMP_IRQHandler
                 DCD     PDMA_IRQHandler
-                DCD     I2S_IRQHandler 
+                DCD     I2S_IRQHandler
                 DCD     PWRWU_IRQHandler
                 DCD     ADC_IRQHandler
-                DCD     Default_Handler  
-                DCD     RTC_IRQHandler  
-                
-                
-                
-                
-                
-                
-                
+                DCD     Default_Handler
+                DCD     RTC_IRQHandler
+
+
+
+
+
+
+
                 AREA    |.text|, CODE, READONLY
-                
-                
-                
-; Reset Handler 
-                
+
+
+
+; Reset Handler
+
                 ENTRY
-                
+
 Reset_Handler   PROC
                 EXPORT  Reset_Handler             [WEAK]
                 IMPORT  SystemInit
                 IMPORT  __main
 
                 LDR     R0, =0x50000100
-                ; Unlock Register                
+                ; Unlock Register
                 LDR     R1, =0x59
                 STR     R1, [R0]
                 LDR     R1, =0x16
@@ -121,17 +121,17 @@ Reset_Handler   PROC
 
                 ; Lock register
                 MOVS    R1, #0
-                STR     R1, [R0]                
-                
+                STR     R1, [R0]
+
                 LDR     R0, =SystemInit
                 BLX     R0
                 LDR     R0, =__main
                 BX      R0
                 ENDP
-                
-                
-; Dummy Exception Handlers (infinite loops which can be modified)                
-                
+
+
+; Dummy Exception Handlers (infinite loops which can be modified)
+
 NMI_Handler     PROC
                 EXPORT  NMI_Handler               [WEAK]
                 B       .
@@ -140,12 +140,12 @@ HardFault_Handler\
                 PROC
                 IMPORT  ProcessHardFault
                 EXPORT  HardFault_Handler         [WEAK]
-                MOV     R0, LR                 
-                MRS     R1, MSP                
-                MRS     R2, PSP                
-                LDR     R3, =ProcessHardFault 
-                BLX     R3                     
-                BX      R0                     
+                MOV     R0, LR
+                MRS     R1, MSP
+                MRS     R2, PSP
+                LDR     R3, =ProcessHardFault
+                BLX     R3
+                BX      R0
                 ENDP
 SVC_Handler     PROC
                 EXPORT  SVC_Handler               [WEAK]
@@ -183,8 +183,8 @@ Default_Handler PROC
                 EXPORT  I2C0_IRQHandler           [WEAK]
                 EXPORT  I2C1_IRQHandler           [WEAK]
                 EXPORT  CAN0_IRQHandler           [WEAK]
-                EXPORT  CAN1_IRQHandler           [WEAK] 
-                EXPORT  SC012_IRQHandler          [WEAK]                               
+                EXPORT  CAN1_IRQHandler           [WEAK]
+                EXPORT  SC012_IRQHandler          [WEAK]
                 EXPORT  USBD_IRQHandler           [WEAK]
                 EXPORT  PS2_IRQHandler            [WEAK]
                 EXPORT  ACMP_IRQHandler           [WEAK]
@@ -193,7 +193,7 @@ Default_Handler PROC
                 EXPORT  PWRWU_IRQHandler          [WEAK]
                 EXPORT  ADC_IRQHandler            [WEAK]
                 EXPORT  RTC_IRQHandler            [WEAK]
-                
+
 BOD_IRQHandler
 WDT_IRQHandler
 EINT0_IRQHandler
@@ -235,13 +235,13 @@ RTC_IRQHandler
 ; User Initial Stack & Heap
 
                 IF      :DEF:__MICROLIB
-                
+
                 EXPORT  __initial_sp
                 EXPORT  __heap_base
                 EXPORT  __heap_limit
-                
+
                 ELSE
-                
+
                 IMPORT  __use_two_region_memory
                 EXPORT  __user_initial_stackheap
 __user_initial_stackheap
@@ -258,25 +258,25 @@ __user_initial_stackheap
 
 ;int32_t SH_DoCommand(int32_t n32In_R0, int32_t n32In_R1, int32_t *pn32Out_R0)
 SH_DoCommand    PROC
-    
+
                 EXPORT      SH_DoCommand
                 IMPORT      SH_Return
-                    
+
                 BKPT   0xAB                ; Wait ICE or HardFault
-                LDR    R3, =SH_Return 
-                MOV    R4, lr          
+                LDR    R3, =SH_Return
+                MOV    R4, lr
                 BLX    R3                  ; Call SH_Return. The return value is in R0
                 BX     R4                  ; Return value = R0
-                
+
                 ENDP
 
 __PC            PROC
                 EXPORT      __PC
-                
+
                 MOV     r0, lr
                 BLX     lr
                 ALIGN
-                    
+
                 ENDP
-                
+
                 END
