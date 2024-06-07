@@ -20,6 +20,12 @@ This BSP folder
 - Device<br>
 	CMSIS compliant device header file.
 
+- NuEdu<br>
+	NuEdu Library and header file.
+	
+- SmartcardLib<br>
+	Library for accessing a smartcard.
+
 - StdDriver<br>
 	All peripheral driver header and source files.
 
@@ -34,6 +40,9 @@ This BSP folder
 
 - ISP<br>
 	Sample codes for In-System-Programming.
+	
+- NuEdu<br>
+	Sample codes for NuEdu.
 
 - Template<br>
 	Software Development Template.
