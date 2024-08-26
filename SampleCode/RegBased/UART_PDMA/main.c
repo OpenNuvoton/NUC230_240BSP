@@ -29,7 +29,7 @@ uint8_t SrcArray[64];
 uint8_t DestArray[64];
 volatile int32_t IntCnt;
 volatile int32_t IsTestOver;
-volatile uint32_t g_u32TwoChannelPdmaTest=0;
+volatile uint32_t g_u32TwoChannelPdmaTest = 0;
 extern char GetChar(void);
 
 
@@ -43,7 +43,7 @@ void ClearBuf(uint32_t u32Addr, uint32_t u32Length, uint8_t u8Pattern)
 
     pu8Ptr = (uint8_t *)u32Addr;
 
-    for (i=0; i<u32Length; i++)
+    for(i = 0; i < u32Length; i++)
     {
         *pu8Ptr++ = u8Pattern;
     }
@@ -54,24 +54,26 @@ void ClearBuf(uint32_t u32Addr, uint32_t u32Length, uint8_t u8Pattern)
 /*---------------------------------------------------------------------------------------------------------*/
 void BuildSrcPattern(uint32_t u32Addr, uint32_t u32Length)
 {
-    uint32_t i=0, j, loop;
+    uint32_t i = 0, j, loop;
     uint8_t* pAddr;
 
     pAddr = (uint8_t *)u32Addr;
 
-    do {
-        if (u32Length > 256)
+    do
+    {
+        if(u32Length > 256)
             loop = 256;
         else
             loop = u32Length;
 
         u32Length = u32Length - loop;
 
-        for(j=0;j<loop;j++)
-            *pAddr++ = (uint8_t)(j+i);
+        for(j = 0; j < loop; j++)
+            *pAddr++ = (uint8_t)(j + i);
 
         i++;
-    } while ((loop !=0) || (u32Length !=0));
+    }
+    while((loop != 0) || (u32Length != 0));
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -84,14 +86,14 @@ void PDMA_UART_TxTest(void)
         PDMA_CSR_PDMACEN_Msk |  /* PDMA channel enable */
         PDMA_SAR_INC |          /* Increment source address */
         PDMA_DAR_FIX |          /* Fixed destination address */
-        PDMA_WIDTH_8|           /* Transfer width 8 bits */
+        PDMA_WIDTH_8 |          /* Transfer width 8 bits */
         (0x2 << PDMA_CSR_MODE_SEL_Pos); /* Memory-to-Peripheral mode */
     PDMA1->SAR = (uint32_t)SrcArray;    /* Source address */
     PDMA1->DAR = (uint32_t)&UART1->THR; /* Destination address */
     PDMA1->BCR = UART_TEST_LENGTH;      /* Transfer count */
 
     /* Service selection */
-    PDMA_GCR->PDSSR1 = (PDMA_GCR->PDSSR1 & (~PDMA_PDSSR1_UART1_TXSEL_Msk)) | (UART_TX_DMA_CH<<PDMA_PDSSR1_UART1_TXSEL_Pos);
+    PDMA_GCR->PDSSR1 = (PDMA_GCR->PDSSR1 & (~PDMA_PDSSR1_UART1_TXSEL_Msk)) | (UART_TX_DMA_CH << PDMA_PDSSR1_UART1_TXSEL_Pos);
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -111,7 +113,7 @@ void PDMA_UART_RxTest(void)
     PDMA0->BCR = UART_TEST_LENGTH;      /* Transfer count */
 
     /* Service selection */
-    PDMA_GCR->PDSSR1 = (PDMA_GCR->PDSSR1 & (~PDMA_PDSSR1_UART1_RXSEL_Msk)) | (UART_RX_DMA_CH<<PDMA_PDSSR1_UART1_RXSEL_Pos);
+    PDMA_GCR->PDSSR1 = (PDMA_GCR->PDSSR1 & (~PDMA_PDSSR1_UART1_RXSEL_Msk)) | (UART_RX_DMA_CH << PDMA_PDSSR1_UART1_RXSEL_Pos);
 }
 
 /*---------------------------------------------------------------------------------------------------------*/
@@ -119,10 +121,10 @@ void PDMA_UART_RxTest(void)
 /*---------------------------------------------------------------------------------------------------------*/
 void PDMA_Callback_0(void)
 {
-    printf("\tTransfer Done %d!\r",++IntCnt);
+    printf("\tTransfer Done %d!\r", ++IntCnt);
 
     /* Use PDMA to do UART loopback test 10 times */
-    if(IntCnt<10)
+    if(IntCnt < 10)
     {
         /* Trigger PDMA */
         PDMA1->CSR |= PDMA_CSR_TRIG_EN_Msk;
@@ -139,15 +141,15 @@ void PDMA_Callback_1(void)
 {
     int32_t i;
 
-    printf("\tTransfer Done %d!\t",++IntCnt);
+    printf("\tTransfer Done %d!\t", ++IntCnt);
 
     /* Show UART Rx data */
-    for(i=0;i<UART_TEST_LENGTH;i++)
-        printf(" 0x%x(%c),",inpb(((uint32_t)DestArray+i)),inpb(((uint32_t)DestArray+i)));
+    for(i = 0; i < UART_TEST_LENGTH; i++)
+        printf(" 0x%x(%c),", inpb(((uint32_t)DestArray + i)), inpb(((uint32_t)DestArray + i)));
     printf("\n");
 
     /* Use PDMA to do UART Rx test 10 times */
-    if(IntCnt<10)
+    if(IntCnt < 10)
     {
         /* Trigger PDMA */
         PDMA0->CSR |= PDMA_CSR_TRIG_EN_Msk;
@@ -185,7 +187,7 @@ void PDMA_IRQHandler(void)
 void UART02_IRQHandler(void)
 {
     /* Get UART0 Rx data and send the data to UART1 Tx */
-    if( UART_GET_INT_FLAG(UART0, UART_ISR_RDA_INT_Msk) )
+    if(UART_GET_INT_FLAG(UART0, UART_ISR_RDA_INT_Msk))
         UART1->THR = UART0->RBR;
 }
 
@@ -206,7 +208,7 @@ void PDMA_UART(int32_t i32option)
     SYS->IPRSTC1 |=  SYS_IPRSTC1_PDMA_RST_Msk;
     SYS->IPRSTC1 &= ~SYS_IPRSTC1_PDMA_RST_Msk;
 
-    if(i32option =='1')
+    if(i32option == '1')
     {
         printf("  [Using TWO PDMA channel].\n");
         printf("  This sample code will use PDMA to do UART1 loopback test 10 times.\n");
@@ -227,7 +229,7 @@ void PDMA_UART(int32_t i32option)
         printf("  Please input %d bytes to trigger PDMA one time.(Ex: Press 'a''b')\n", UART_TEST_LENGTH);
     }
 
-    if(g_u32TwoChannelPdmaTest==1)
+    if(g_u32TwoChannelPdmaTest == 1)
     {
         /* Enable PDMA channel 1 clock */
         PDMA_GCR->GCRCSR |= PDMA_GCRCSR_CLK1_EN_Msk;
@@ -249,7 +251,7 @@ void PDMA_UART(int32_t i32option)
     NVIC_EnableIRQ(PDMA_IRQn);
 
     /* Enable UART0 RDA interrupt */
-    if(g_u32TwoChannelPdmaTest==0)
+    if(g_u32TwoChannelPdmaTest == 0)
     {
         UART_ENABLE_INT(UART0, UART_IER_RDA_IEN_Msk);
         NVIC_EnableIRQ(UART02_IRQn);
@@ -258,11 +260,11 @@ void PDMA_UART(int32_t i32option)
     /* Trigger PDMA */
     PDMA0->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
 
-    if(g_u32TwoChannelPdmaTest==1)
+    if(g_u32TwoChannelPdmaTest == 1)
         PDMA1->CSR |= (PDMA_CSR_TRIG_EN_Msk | PDMA_CSR_PDMACEN_Msk);
 
     /* Enable UART Tx and Rx PDMA function */
-    if(g_u32TwoChannelPdmaTest==1)
+    if(g_u32TwoChannelPdmaTest == 1)
         UART1->IER |= UART_IER_DMA_TX_EN_Msk;
     else
         UART1->IER &= ~UART_IER_DMA_TX_EN_Msk;
@@ -281,7 +283,7 @@ void PDMA_UART(int32_t i32option)
     }
 
     /* Disable UART Tx and Rx PDMA function */
-    UART1->IER &= ~(UART_IER_DMA_TX_EN_Msk|UART_IER_DMA_RX_EN_Msk);
+    UART1->IER &= ~(UART_IER_DMA_TX_EN_Msk | UART_IER_DMA_RX_EN_Msk);
 
     /* Disable PDMA channel */
     PDMA_GCR->GCRCSR = 0;
@@ -297,6 +299,7 @@ void PDMA_UART(int32_t i32option)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -305,7 +308,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -318,14 +323,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
@@ -436,7 +445,8 @@ int32_t main(void)
             printf("\n\n  UART PDMA sample code is complete.\n");
         }
 
-    }while(unItem!=27);
+    }
+    while(unItem != 27);
 
     while(1);
 }

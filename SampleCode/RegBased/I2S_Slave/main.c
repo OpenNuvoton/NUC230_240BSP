@@ -20,15 +20,18 @@ uint32_t g_u32TxValue;
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
-    
+
     /* Enable IRC22M clock */
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -43,8 +46,12 @@ void SYS_Init(void)
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72 MHz */
     FMC->FATCON |= 0x50;
@@ -168,15 +175,19 @@ int32_t main(void)
 
     printf("Start I2S ...\nTx value: 0x%X\n", g_u32TxValue);
 
-    while(1) {
-        if((I2S->STATUS & I2S_STATUS_RXEMPTY_Msk) == 0) {
+    while(1)
+    {
+        if((I2S->STATUS & I2S_STATUS_RXEMPTY_Msk) == 0)
+        {
             u32DataCount++;
             u32RxValue2 = I2S->RXFIFO;
-            if(u32RxValue1 != u32RxValue2) {
+            if(u32RxValue1 != u32RxValue2)
+            {
                 u32RxValue1 = u32RxValue2;
                 printf("Tx value: 0x%X;  Rx value: 0x%X\n", g_u32TxValue, u32RxValue1);
             }
-            if(u32DataCount >= 50000) {
+            if(u32DataCount >= 50000)
+            {
                 g_u32TxValue = 0xAA00AA00 | ((g_u32TxValue + 0x00020002) & 0x00FF00FF); /* g_u32TxValue: 0xAA00AA01, 0xAA02AA03, ..., 0xAAFEAAFF */
                 printf("Tx value: 0x%X\n", g_u32TxValue);
                 u32DataCount = 0;

@@ -42,48 +42,67 @@ void PDMA_IRQHandler(void)
 {
     uint32_t status = PDMA_GET_INT_STATUS();
 
-    if(status & 0x1) {  /* CH0 */
+    if(status & 0x1)    /* CH0 */
+    {
         if(PDMA_GET_CH_INT_STS(0) & 0x2)
             u32IsTestOver = 0;
         PDMA_CLR_CH_INT_FLAG(0, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x2) {  /* CH1 */
+    }
+    else if(status & 0x2)      /* CH1 */
+    {
         if(PDMA_GET_CH_INT_STS(1) & 0x2)
             u32IsTestOver = 1;
         PDMA_CLR_CH_INT_FLAG(1, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x4) {  /* CH2 */
+    }
+    else if(status & 0x4)      /* CH2 */
+    {
         if(PDMA_GET_CH_INT_STS(2) & 0x2)
             u32IsTestOver = 2;
         PDMA_CLR_CH_INT_FLAG(2, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x8) {  /* CH3 */
+    }
+    else if(status & 0x8)      /* CH3 */
+    {
         if(PDMA_GET_CH_INT_STS(3) & 0x2)
             u32IsTestOver = 3;
         PDMA_CLR_CH_INT_FLAG(3, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x10) {  /* CH4 */
+    }
+    else if(status & 0x10)      /* CH4 */
+    {
         if(PDMA_GET_CH_INT_STS(4) & 0x2)
             u32IsTestOver = 4;
         PDMA_CLR_CH_INT_FLAG(4, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x20) {  /* CH5 */
+    }
+    else if(status & 0x20)      /* CH5 */
+    {
         if(PDMA_GET_CH_INT_STS(5) & 0x2)
             u32IsTestOver = 5;
         PDMA_CLR_CH_INT_FLAG(5, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x40) {  /* CH6 */
+    }
+    else if(status & 0x40)      /* CH6 */
+    {
         if(PDMA_GET_CH_INT_STS(6) & 0x2)
             u32IsTestOver = 6;
         PDMA_CLR_CH_INT_FLAG(6, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x80) {  /* CH7 */
+    }
+    else if(status & 0x80)      /* CH7 */
+    {
         if(PDMA_GET_CH_INT_STS(7) & 0x2)
             u32IsTestOver = 7;
         PDMA_CLR_CH_INT_FLAG(7, PDMA_ISR_BLKD_IF_Msk);
-    } else if(status & 0x100) {  /* CH8 */
+    }
+    else if(status & 0x100)      /* CH8 */
+    {
         if(PDMA_GET_CH_INT_STS(8) & 0x2)
             u32IsTestOver = 8;
         PDMA_CLR_CH_INT_FLAG(8, PDMA_ISR_BLKD_IF_Msk);
-    } else
+    }
+    else
         printf("unknown interrupt !!\n");
 }
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -91,7 +110,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -109,8 +130,12 @@ void SYS_Init(void)
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
@@ -212,7 +237,3 @@ int32_t main(void)
     PDMA_GCR->GCRCSR = 0;
     while(1);
 }
-
-
-
-

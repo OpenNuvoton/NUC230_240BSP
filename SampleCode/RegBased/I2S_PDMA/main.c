@@ -3,7 +3,7 @@
  * @version  V2.00
  * $Revision: 1 $
  * $Date: 15/04/21 2:20p $
- * @brief    
+ * @brief
  *           Configure I2S as Master mode and demonstrate how I2S works with PDMA.
  *           Both TX PDMA function and RX PDMA function will be enabled.
  * @note
@@ -77,14 +77,14 @@ int32_t main(void)
     g_au32RxBuffer[0] = 0;
     for(u32DataCount = 1; u32DataCount < TEST_COUNT; u32DataCount++)
     {
-        g_au32TxBuffer[u32DataCount] = g_au32TxBuffer[u32DataCount-1] + 0x00020002;
+        g_au32TxBuffer[u32DataCount] = g_au32TxBuffer[u32DataCount - 1] + 0x00020002;
         g_au32RxBuffer[u32DataCount] = 0;
     }
 
     /* I2S PDMA TX channel configuration */
     /* Enable PDMA channel 3 clock */
-    PDMA_GCR->GCRCSR |= PDMA_GCRCSR_CLK3_EN_Msk; 
-    PDMA3->CSR = 
+    PDMA_GCR->GCRCSR |= PDMA_GCRCSR_CLK3_EN_Msk;
+    PDMA3->CSR =
         PDMA_CSR_PDMACEN_Msk  |  /* PDMA channel enable */
         PDMA_SAR_INC  |          /* Increment source address */
         PDMA_DAR_FIX  |          /* Fixed destination address */
@@ -92,14 +92,14 @@ int32_t main(void)
         (0x2 << PDMA_CSR_MODE_SEL_Pos); /* Memory-to-Peripheral mode */
     PDMA3->SAR = (uint32_t)g_au32TxBuffer;    /* Source address */
     PDMA3->DAR = (uint32_t)&I2S->TXFIFO;      /* Destination address */
-    PDMA3->BCR = TEST_COUNT*4;                /* Transfer count */
+    PDMA3->BCR = TEST_COUNT * 4;              /* Transfer count */
     /* Service selection */
-    PDMA_GCR->PDSSR2 = (PDMA_GCR->PDSSR2 & (~PDMA_PDSSR2_I2S_TXSEL_Msk)) | (3<<PDMA_PDSSR2_I2S_TXSEL_Pos);
-    
+    PDMA_GCR->PDSSR2 = (PDMA_GCR->PDSSR2 & (~PDMA_PDSSR2_I2S_TXSEL_Msk)) | (3 << PDMA_PDSSR2_I2S_TXSEL_Pos);
+
     /* I2S PDMA RX channel configuration */
     /* Enable PDMA channel 2 clock */
-    PDMA_GCR->GCRCSR |= PDMA_GCRCSR_CLK2_EN_Msk; 
-    PDMA2->CSR = 
+    PDMA_GCR->GCRCSR |= PDMA_GCRCSR_CLK2_EN_Msk;
+    PDMA2->CSR =
         PDMA_CSR_PDMACEN_Msk |       /* PDMA channel enable */
         PDMA_SAR_FIX  |              /* Fixed source address */
         PDMA_DAR_INC  |              /* Increment destination address */
@@ -107,9 +107,9 @@ int32_t main(void)
         (0x1 << PDMA_CSR_MODE_SEL_Pos); /* Peripheral-to-Memory mode */
     PDMA2->SAR = (uint32_t)&I2S->RXFIFO;     /* Source address */
     PDMA2->DAR = (uint32_t)g_au32RxBuffer;   /* Destination address */
-    PDMA2->BCR = TEST_COUNT*4;               /* Transfer count */
+    PDMA2->BCR = TEST_COUNT * 4;             /* Transfer count */
     /* Service selection */
-    PDMA_GCR->PDSSR2 = (PDMA_GCR->PDSSR2 & (~PDMA_PDSSR2_I2S_RXSEL_Msk)) | (2<<PDMA_PDSSR2_I2S_RXSEL_Pos);
+    PDMA_GCR->PDSSR2 = (PDMA_GCR->PDSSR2 & (~PDMA_PDSSR2_I2S_RXSEL_Msk)) | (2 << PDMA_PDSSR2_I2S_RXSEL_Pos);
 
     /* Clear RX FIFO */
     I2S->CON |= I2S_CON_CLR_RXFIFO_Msk;
@@ -118,10 +118,10 @@ int32_t main(void)
     PDMA3->CSR |= PDMA_CSR_TRIG_EN_Msk;
     /* Enable RX DMA and TX DMA function */
     I2S->CON |= (I2S_CON_RXDMA_Msk | I2S_CON_TXDMA_Msk | I2S_CON_RXEN_Msk | I2S_CON_TXEN_Msk);
-    
+
     /* Check I2S RX DMA transfer done interrupt flag */
     u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-    while((PDMA2->ISR & PDMA_ISR_BLKD_IF_Msk)==0)
+    while((PDMA2->ISR & PDMA_ISR_BLKD_IF_Msk) == 0)
     {
         if(--u32TimeOutCnt == 0)
         {
@@ -131,10 +131,10 @@ int32_t main(void)
     }
     /* Clear the transfer done interrupt flag */
     PDMA2->ISR = PDMA_ISR_BLKD_IF_Msk;
-    
+
     /* Check I2S TX DMA transfer done interrupt flag */
     u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-    while((PDMA3->ISR & PDMA_ISR_BLKD_IF_Msk)==0)
+    while((PDMA3->ISR & PDMA_ISR_BLKD_IF_Msk) == 0)
     {
         if(--u32TimeOutCnt == 0)
         {
@@ -147,7 +147,7 @@ int32_t main(void)
 
     /* Disable RX function and TX function */
     I2S->CON &= ~(I2S_CON_RXEN_Msk | I2S_CON_TXEN_Msk);
-    
+
     /* Print the received data */
     for(u32DataCount = 0; u32DataCount < TEST_COUNT; u32DataCount++)
     {
@@ -156,26 +156,29 @@ int32_t main(void)
 
 lexit:
     printf("\n\nExit I2S sample code.\n");
-    
+
     /* Disable PDMA peripheral clock */
     CLK->AHBCLK &= ~CLK_AHBCLK_PDMA_EN_Msk;
     /* Disbale I2S peripheral clock */
     CLK->APBCLK &= ~CLK_APBCLK_I2S_EN_Msk;
-    
+
     while(1);
 }
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
-    
+
     /* Enable IRC22M clock */
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -190,12 +193,16 @@ void SYS_Init(void)
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72 MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
 

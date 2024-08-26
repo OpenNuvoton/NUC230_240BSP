@@ -54,7 +54,8 @@ void RS485_HANDLE()
 
     if((u32IntSts & UART_ISR_RLS_INT_Msk) && (u32IntSts & UART_ISR_RDA_INT_Msk))           /* RLS INT & RDA INT */ //For RS485 Detect Address
     {
-        if(UART1->FSR & UART_FSR_RS485_ADD_DETF_Msk) { /* ADD_IF, RS485 mode */
+        if(UART1->FSR & UART_FSR_RS485_ADD_DETF_Msk)   /* ADD_IF, RS485 mode */
+        {
             addr = UART1->DATA;
             UART1->FSR = UART_FSR_RS485_ADD_DETF_Msk; /* clear ADD_IF flag */
             printf("\nAddr=0x%x,Get:", addr);
@@ -62,9 +63,12 @@ void RS485_HANDLE()
 #if (IS_USE_RS485NMM ==1) //RS485_NMM
             /* if address match, enable RX to receive data, otherwise to disable RX. */
             /* In NMM mode, user can decide multi-address filter. In AAD mode, only one address can set */
-            if((addr == MATCH_ADDRSS1) || (addr == MATCH_ADDRSS2)) {
+            if((addr == MATCH_ADDRSS1) || (addr == MATCH_ADDRSS2))
+            {
                 UART1->FCR &= ~UART_FCR_RX_DIS_Msk;   /* Enable RS485 RX */
-            } else {
+            }
+            else
+            {
                 printf("\n");
                 UART1->FCR |= UART_FCR_RX_DIS_Msk;    /* Disable RS485 RX */
                 UART1->FCR |= UART_FCR_RFR_Msk;       /* Clear data from RX FIFO */
@@ -72,12 +76,15 @@ void RS485_HANDLE()
 #endif
 
         }
-    } else if((u32IntSts & UART_ISR_RDA_INT_Msk) || (u32IntSts & UART_ISR_TOUT_INT_Msk)) {  /* Rx Ready or Time-out INT */
+    }
+    else if((u32IntSts & UART_ISR_RDA_INT_Msk) || (u32IntSts & UART_ISR_TOUT_INT_Msk))      /* Rx Ready or Time-out INT */
+    {
         /* Handle received data */
         printf("%d,", UART1->RBR);
     }
 
-    else if(u32IntSts & UART_ISR_BUF_ERR_INT_Msk) {   /* Buffer Error INT */
+    else if(u32IntSts & UART_ISR_BUF_ERR_INT_Msk)     /* Buffer Error INT */
+    {
         printf("\nBuffer Error...\n");
         UART1->FSR = (UART_FSR_RX_OVER_IF_Msk | UART_FSR_TX_OVER_IF_Msk);
     }
@@ -211,6 +218,7 @@ void RS485_FunctionTest()
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -219,7 +227,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -232,14 +242,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */

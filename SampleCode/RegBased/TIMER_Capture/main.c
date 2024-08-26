@@ -68,7 +68,8 @@ void TMR1_IRQHandler(void)
  */
 void TMR2_IRQHandler(void)
 {
-    if(TIMER_GetCaptureIntFlag(TIMER2) == 1) {
+    if(TIMER_GetCaptureIntFlag(TIMER2) == 1)
+    {
         /* Clear Timer2 capture interrupt flag */
         TIMER_ClearCaptureIntFlag(TIMER2);
 
@@ -95,6 +96,7 @@ void TMR3_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -102,7 +104,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -114,17 +118,21 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -151,9 +159,9 @@ void SYS_Init(void)
                      SYS_GPB_MFP_PB8_TM0 | SYS_GPB_MFP_PB10_TM2 | SYS_GPB_MFP_PB11_TM3 |
                      SYS_GPB_MFP_PB2_TM2_EXT);
 
-    SYS->ALT_MFP  &= ~( SYS_ALT_MFP_PB8_Msk | SYS_ALT_MFP_PB10_Msk | SYS_ALT_MFP_PB11_Msk |
-                        SYS_ALT_MFP_PB2_Msk);
-    SYS->ALT_MFP  |= (SYS_ALT_MFP_PB8_TM0 | SYS_ALT_MFP_PB10_TM2 |SYS_ALT_MFP_PB11_TM3 |
+    SYS->ALT_MFP  &= ~(SYS_ALT_MFP_PB8_Msk | SYS_ALT_MFP_PB10_Msk | SYS_ALT_MFP_PB11_Msk |
+                       SYS_ALT_MFP_PB2_Msk);
+    SYS->ALT_MFP  |= (SYS_ALT_MFP_PB8_TM0 | SYS_ALT_MFP_PB10_TM2 | SYS_ALT_MFP_PB11_TM3 |
                       SYS_ALT_MFP_PB2_TM2_EXT);
     SYS->ALT_MFP2 &= ~SYS_ALT_MFP2_PB2_TM2_Msk;
     SYS->ALT_MFP2 |= SYS_ALT_MFP2_PB2_TM2_EXT;
@@ -228,21 +236,27 @@ int main(void)
 
     /* Check TM2_EXT interrupt counts */
     u32Loop = 0;
-    while(g_au32TMRINTCount[2] < 10) {
-        if(g_au32TMRINTCount[2] != u32InitCount) {
+    while(g_au32TMRINTCount[2] < 10)
+    {
+        if(g_au32TMRINTCount[2] != u32InitCount)
+        {
             au32CAPValus[u32InitCount] = TIMER_GetCaptureData(TIMER2);
             printf("[%2d] - %4d\n", g_au32TMRINTCount[2], au32CAPValus[u32InitCount]);
-            if(u32InitCount > 1) {
-                if((au32CAPValus[u32InitCount] - au32CAPValus[u32InitCount - 1]) != 500) {
+            if(u32InitCount > 1)
+            {
+                if((au32CAPValus[u32InitCount] - au32CAPValus[u32InitCount - 1]) != 500)
+                {
                     printf("*** FAIL ***\n");
                     goto lexit;
                 }
             }
             u32InitCount = g_au32TMRINTCount[2];
         }
-        
-        if(au32CAPValus[0] == 0) {
-            if(u32Loop++ > (SystemCoreClock/100)) {
+
+        if(au32CAPValus[0] == 0)
+        {
+            if(u32Loop++ > (SystemCoreClock / 100))
+            {
                 printf("Time-out error. Please check timer couner and capture input source.\n");
                 goto lexit;
             }

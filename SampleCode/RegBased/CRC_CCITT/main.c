@@ -35,30 +35,38 @@ void PDMA_IRQHandler(void)
     volatile uint32_t u32IntStatus = CRC_GET_INT_FLAG();
 
     /* Check CRC interrupt status */
-    if(u32IntStatus & CRC_DMAISR_CRC_BLKD_IF_Msk) {
+    if(u32IntStatus & CRC_DMAISR_CRC_BLKD_IF_Msk)
+    {
         /* Clear Block Transfer Done interrupt flag */
         CRC_CLR_INT_FLAG(CRC_DMAISR_CRC_BLKD_IF_Msk);
 
         g_u8IsBlockTransferDoneINTFlag++;
-    } else if(u32IntStatus & CRC_DMAISR_CRC_TABORT_IF_Msk) {
+    }
+    else if(u32IntStatus & CRC_DMAISR_CRC_TABORT_IF_Msk)
+    {
         /* Clear Target Abort interrupt flag */
         CRC_CLR_INT_FLAG(CRC_DMAISR_CRC_TABORT_IF_Msk);
 
         g_u8IsTargetAbortINTFlag++;
-    } else {
+    }
+    else
+    {
         printf("Un-expected interrupts.\n");
     }
 }
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
     /* Enable IRC22M clock */
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -70,13 +78,17 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
@@ -181,12 +193,15 @@ int main(void)
     CRC->CTL |= CRC_CTL_TRIG_EN_Msk;
 
     /* Wait CRC interrupt flag occurred */
-    while(1) {
-        if(g_u8IsTargetAbortINTFlag == 1) {
+    while(1)
+    {
+        if(g_u8IsTargetAbortINTFlag == 1)
+        {
             printf("DMA Target Abort interrupt occurred.\n");
             break;
         }
-        if(g_u8IsBlockTransferDoneINTFlag == 1) {
+        if(g_u8IsBlockTransferDoneINTFlag == 1)
+        {
             break;
         }
     }
@@ -200,9 +215,12 @@ int main(void)
     /* Get CRC-CCITT checksum value */
     u32CalChecksum = CRC->CHECKSUM;
     u32CalChecksum &= 0xFFFF;
-    if(g_u8IsBlockTransferDoneINTFlag == 1) {
+    if(g_u8IsBlockTransferDoneINTFlag == 1)
+    {
         printf("CRC checksum is 0x%X ... %s.\n", u32CalChecksum, (u32CalChecksum == u32TargetChecksum) ? "PASS" : "FAIL");
-    } else {
+    }
+    else
+    {
         printf("CRC fail.\n");
     }
 

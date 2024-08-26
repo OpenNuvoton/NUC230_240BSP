@@ -539,8 +539,7 @@ void CLK_EnableModuleClock(uint32_t u32ModuleIdx)
   *             - \ref SPI1_MODULE
   *             - \ref SPI2_MODULE
   *             - \ref SPI3_MODULE
-  *             - \ref UART0_MODULE
-  *             - \ref UART1_MODULE
+  *             - \ref UART0_MODULE  *             - \ref UART1_MODULE
   *             - \ref UART2_MODULE
   *             - \ref PWM01_MODULE
   *             - \ref PWM23_MODULE
@@ -719,7 +718,7 @@ void CLK_DisablePLL(void)
   */
 uint32_t CLK_WaitClockReady(uint32_t u32ClkMask)
 {
-    int32_t i32TimeOutCnt = SystemCoreClock>>1; /* 500ms time-out */
+    int32_t i32TimeOutCnt = SystemCoreClock >> 1; /* 500ms time-out */
 
     while((CLK->CLKSTATUS & u32ClkMask) != u32ClkMask)
     {
@@ -750,7 +749,7 @@ void CLK_EnableSysTick(uint32_t u32ClkSrc, uint32_t u32Count)
     SysTick->CTRL = 0;
 
     /* Set System Tick clock source */
-    if( u32ClkSrc == CLK_CLKSEL0_STCLK_S_HCLK )
+    if(u32ClkSrc == CLK_CLKSEL0_STCLK_S_HCLK)
         /* Select System Tick clock source from core clock */
         SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
     else

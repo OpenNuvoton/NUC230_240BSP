@@ -27,7 +27,7 @@ void PowerDownFunction(void)
     /* To check if all the debug messages are finished */
     u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
     UART_WAIT_TX_EMPTY(UART0)
-        if(--u32TimeOutCnt == 0) break;
+    if(--u32TimeOutCnt == 0) break;
 
     SCB->SCR = 4;
 
@@ -41,10 +41,13 @@ void PowerDownFunction(void)
 void GPAB_IRQHandler(void)
 {
     /* To check if PB.3 interrupt occurred */
-    if(GPIO_GET_INT_FLAG(PB, BIT3)) {
+    if(GPIO_GET_INT_FLAG(PB, BIT3))
+    {
         GPIO_CLR_INT_FLAG(PB, BIT3);
         printf("PB.3 INT occurred.\n");
-    } else {
+    }
+    else
+    {
         /* Un-expected interrupt. Just clear all PA, PB interrupts */
         PA->ISRC = PA->ISRC;
         PB->ISRC = PB->ISRC;
@@ -54,6 +57,7 @@ void GPAB_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -62,7 +66,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -75,14 +81,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
@@ -148,7 +158,8 @@ int32_t main(void)
     NVIC_EnableIRQ(GPAB_IRQn);
 
     /* Waiting for PB.3 rising-edge interrupt event */
-    while(1) {
+    while(1)
+    {
         printf("Enter to Power-Down ......\n");
         PowerDownFunction();
 

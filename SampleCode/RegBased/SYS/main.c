@@ -41,7 +41,8 @@ void BOD_IRQHandler(void)
 /*---------------------------------------------------------------------------------------------------------*/
 #define PI_NUM  256
 int32_t f[PI_NUM + 1];
-uint32_t piTbl[19] = {
+uint32_t piTbl[19] =
+{
     3141,
     5926,
     5358,
@@ -74,14 +75,16 @@ int32_t pi(void)
         f[b++] = a / 5;
 
     i = 0;
-    for(; d = 0, g = c * 2; c -= 14,/*printf("%.4d\n",e+d/a),*/ piResult[i++] = e + d / a, e = d % a) {
+    for(; d = 0, g = c * 2; c -= 14,/*printf("%.4d\n",e+d/a),*/ piResult[i++] = e + d / a, e = d % a)
+    {
         if(i == 19)
             break;
 
         for(b = c; d += f[b] * a, f[b] = d % --g, d /= g--, --b; d *= b);
     }
     i32Err = 0;
-    for(i = 0; i < 19; i++) {
+    for(i = 0; i < 19; i++)
+    {
         if(piTbl[i] != piResult[i])
             i32Err = -1;
     }
@@ -93,13 +96,15 @@ void Delay(uint32_t x)
 {
     int32_t i;
 
-    for(i = 0; i < x; i++) {
+    for(i = 0; i < x; i++)
+    {
         __NOP();
         __NOP();
     }
 }
 
-uint32_t g_au32PllSetting[] = {
+uint32_t g_au32PllSetting[] =
+{
     CLK_PLLCON_PLL_SRC_HXT | CLK_PLLCON_NR(3) | CLK_PLLCON_NF(25) | CLK_PLLCON_NO_4,  /* PLL = 25MHz */
     CLK_PLLCON_PLL_SRC_HXT | CLK_PLLCON_NR(3) | CLK_PLLCON_NF(29) | CLK_PLLCON_NO_4,  /* PLL = 29MHz */
     CLK_PLLCON_PLL_SRC_HXT | CLK_PLLCON_NR(3) | CLK_PLLCON_NF(33) | CLK_PLLCON_NO_4,  /* PLL = 33MHz */
@@ -120,7 +125,8 @@ void SYS_PLL_Test(void)
 
     printf("\n-------------------------[ Test PLL ]-----------------------------\n");
 
-    for(i = 0; i < sizeof(g_au32PllSetting) / sizeof(g_au32PllSetting[0]) ; i++) {
+    for(i = 0; i < sizeof(g_au32PllSetting) / sizeof(g_au32PllSetting[0]) ; i++)
+    {
 
         /* Switch HCLK clock source to HXT and HCLK source divide 1 */
         CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HXT;
@@ -134,8 +140,10 @@ void SYS_PLL_Test(void)
 
         /* Waiting for PLL clock ready */
         u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-        while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk)) {
-            if(--u32TimeOutCnt == 0) {
+        while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+        {
+            if(--u32TimeOutCnt == 0)
+            {
                 printf("Wait for PLL stable time-out!\n");
                 return;
             }
@@ -161,9 +169,12 @@ void SYS_PLL_Test(void)
         /* The delay loop is used to check if the CPU speed is increasing */
         Delay(0x400000);
 
-        if(pi()) {
+        if(pi())
+        {
             printf("[FAIL]\n");
-        } else {
+        }
+        else
+        {
             printf("[OK]\n");
         }
 
@@ -174,6 +185,7 @@ void SYS_PLL_Test(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -182,7 +194,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -195,14 +209,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
@@ -282,7 +300,8 @@ int32_t main(void)
     printf("|    NUC230_240 System Driver Sample Code    |\n");
     printf("+--------------------------------------------+\n");
 
-    if(M32(FLAG_ADDR) == SIGNATURE) {
+    if(M32(FLAG_ADDR) == SIGNATURE)
+    {
         printf("  CPU Reset success!\n");
         M32(FLAG_ADDR) = 0;
         printf("  Press any key to continue ...\n");
@@ -307,7 +326,8 @@ int32_t main(void)
     SYS_UnlockReg();
 
     /* Check if the write-protected registers are unlocked before BOD setting and CPU Reset */
-    if(SYS->REGWRPROT != 0) {
+    if(SYS->REGWRPROT != 0)
+    {
         printf("Protected Address is Unlocked\n");
     }
 

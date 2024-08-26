@@ -58,14 +58,16 @@ void PowerDownFunction(void)
  */
 void TMR0_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER0) == 1) {
+    if(TIMER_GetIntFlag(TIMER0) == 1)
+    {
         /* Clear Timer0 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER0);
 
         g_au32TMRINTCount[0]++;
     }
 
-    if(TIMER_GetWakeupFlag(TIMER0) == 1) {
+    if(TIMER_GetWakeupFlag(TIMER0) == 1)
+    {
         /* Clear Timer0 wake-up flag */
         TIMER_ClearWakeupFlag(TIMER0);
 
@@ -75,6 +77,7 @@ void TMR0_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -82,7 +85,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -94,14 +99,20 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk | CLK_PWRCON_OSC10K_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC10K_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC10K_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
@@ -182,10 +193,13 @@ int main(void)
     TIMER_Start(TIMER0);
 
     u32InitCount = g_u8IsTMR0WakeupFlag = g_au32TMRINTCount[0] = 0;
-    while(g_au32TMRINTCount[0] < 10) {
-        if(g_au32TMRINTCount[0] != u32InitCount) {
+    while(g_au32TMRINTCount[0] < 10)
+    {
+        if(g_au32TMRINTCount[0] != u32InitCount)
+        {
             printf("Timer0 interrupt count - %d\n", g_au32TMRINTCount[0]);
-            if(g_au32TMRINTCount[0] == 3) {
+            if(g_au32TMRINTCount[0] == 3)
+            {
                 /* To program PWRCON register, it needs to disable register protection first. */
                 SYS_UnlockReg();
 
@@ -193,11 +207,13 @@ int main(void)
 
                 /* Check if Timer0 time-out interrupt and wake-up flag occurred */
                 u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-                while(1) {
+                while(1)
+                {
                     if(((CLK->PWRCON & CLK_PWRCON_PD_WU_STS_Msk) == CLK_PWRCON_PD_WU_STS_Msk) && (g_u8IsTMR0WakeupFlag == 1))
                         break;
 
-                    if(--u32TimeOutCnt == 0) {
+                    if(--u32TimeOutCnt == 0)
+                    {
                         printf("Wait for System or Timer interrupt time-out!\n");
                         break;
                     }

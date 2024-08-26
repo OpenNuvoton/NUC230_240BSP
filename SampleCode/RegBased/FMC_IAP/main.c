@@ -30,6 +30,7 @@ int32_t g_FMC_i32ErrCode;
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -38,7 +39,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -50,11 +53,15 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -114,10 +121,12 @@ void FMC_LDROM_Test(void)
     /* Erase Verify */
     i32Err = 0;
 
-    for(i = FMC_LDROM_BASE; i < (FMC_LDROM_BASE + FMC_LDROM_SIZE); i += 4) {
+    for(i = FMC_LDROM_BASE; i < (FMC_LDROM_BASE + FMC_LDROM_SIZE); i += 4)
+    {
         u32Data = FMC_Read(i);
 
-        if(u32Data != 0xFFFFFFFF) {
+        if(u32Data != 0xFFFFFFFF)
+        {
             i32Err = 1;
         }
     }
@@ -130,9 +139,11 @@ void FMC_LDROM_Test(void)
     printf("  Program Simple LD Code ..................... ");
     pu32Loader = (uint32_t *)&loaderImageBase;
     g_u32ImageSize = (uint32_t)&loaderImageLimit - (uint32_t)&loaderImageBase;
-    for(i = 0; i < g_u32ImageSize; i += 4) {
+    for(i = 0; i < g_u32ImageSize; i += 4)
+    {
         /* Erase page when necessary */
-        if((i & (FMC_FLASH_PAGE_SIZE - 1)) == 0) {
+        if((i & (FMC_FLASH_PAGE_SIZE - 1)) == 0)
+        {
             FMC_Erase(FMC_LDROM_BASE + i);
         }
 
@@ -141,15 +152,19 @@ void FMC_LDROM_Test(void)
 
     /* Verify loader */
     i32Err = 0;
-    for(i = 0; i < g_u32ImageSize; i += 4) {
+    for(i = 0; i < g_u32ImageSize; i += 4)
+    {
         u32Data = FMC_Read(FMC_LDROM_BASE + i);
         if(u32Data != pu32Loader[i / 4])
             i32Err = 1;
     }
 
-    if(i32Err) {
+    if(i32Err)
+    {
         printf("[FAIL]\n");
-    } else {
+    }
+    else
+    {
         printf("[OK]\n");
     }
 }
@@ -214,23 +229,28 @@ int32_t main(void)
             getchar();
             SYS->IPRSTC1 = 0x1; /* Reset MCU */
             while(1);
-        } else {
+        }
+        else
+        {
             goto lexit;
         }
     }
 
     printf("Do you want to write LDROM code to 0x100000 (y/n)?\n");
 
-    if(getchar() == 'y') {
+    if(getchar() == 'y')
+    {
         /* Check LD image size */
         g_u32ImageSize = (uint32_t)&loaderImageLimit - (uint32_t)&loaderImageBase;
 
-        if(g_u32ImageSize == 0) {
+        if(g_u32ImageSize == 0)
+        {
             printf("  ERROR: Loader Image is 0 bytes!\n");
             goto lexit;
         }
 
-        if(g_u32ImageSize > FMC_LDROM_SIZE) {
+        if(g_u32ImageSize > FMC_LDROM_SIZE)
+        {
             printf("  ERROR: Loader Image is larger than 4K Bytes!\n");
             goto lexit;
         }
@@ -244,7 +264,7 @@ int32_t main(void)
     {
         /* Call the function of LDROM */
         func = (int32_t (*)(int32_t))g_au32funcTable[i];
-        if(func(i + 1) == ((i + 1)*(i + 1)))
+        if(func(i + 1) == ((i + 1) * (i + 1)))
         {
             printf("Call LDROM function %d ok!\n", i);
         }
@@ -280,7 +300,3 @@ lexit:
     printf("\nDone\n");
     while(SYS->PDID) __WFI();
 }
-
-
-
-

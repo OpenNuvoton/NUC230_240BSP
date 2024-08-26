@@ -63,7 +63,8 @@ int main(void)
     printf("In the meanwhile the SPI controller will receive %d data from the off-chip master device.\n", TEST_COUNT);
     printf("After the transfer is done, the %d received data will be printed out.\n", TEST_COUNT);
 
-    for(u32TxDataCount = 0; u32TxDataCount < TEST_COUNT; u32TxDataCount++) {
+    for(u32TxDataCount = 0; u32TxDataCount < TEST_COUNT; u32TxDataCount++)
+    {
         /* Write the initial value to source buffer */
         g_au32SourceData[u32TxDataCount] = 0x00AA0000 + u32TxDataCount;
         /* Clear destination buffer */
@@ -77,7 +78,8 @@ int main(void)
     printf("\n");
 
     /* Access TX and RX FIFO */
-    while(u32RxDataCount < TEST_COUNT) {
+    while(u32RxDataCount < TEST_COUNT)
+    {
         /* Check TX FULL flag and TX data count */
         if(((SPI0->STATUS & SPI_STATUS_TX_FULL_Msk) == 0) && (u32TxDataCount < TEST_COUNT))
             SPI0->TX[0] = g_au32SourceData[u32TxDataCount++]; /* Write to TX FIFO */
@@ -88,7 +90,8 @@ int main(void)
 
     /* Print the received data */
     printf("Received data:\n");
-    for(u32RxDataCount = 0; u32RxDataCount < TEST_COUNT; u32RxDataCount++) {
+    for(u32RxDataCount = 0; u32RxDataCount < TEST_COUNT; u32RxDataCount++)
+    {
         printf("%d:\t0x%X\n", u32RxDataCount, g_au32DestinationData[u32RxDataCount]);
     }
     printf("The data transfer was done.\n");
@@ -102,6 +105,7 @@ int main(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -109,26 +113,32 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable external 12 MHz XTAL */
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Set PLL to Power-down mode and PLL_STB bit in CLKSTATUS register will be cleared by hardware.*/
     CLK->PLLCON |= CLK_PLLCON_PD_Msk;
-    
+
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72 MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Select PLL as the system clock source */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -182,5 +192,3 @@ void SPI_Init(void)
 }
 
 /*** (C) COPYRIGHT 2014 Nuvoton Technology Corp. ***/
-
-

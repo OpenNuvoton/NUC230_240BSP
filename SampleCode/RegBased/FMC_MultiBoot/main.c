@@ -24,6 +24,7 @@ int32_t g_FMC_i32ErrCode;
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -32,7 +33,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -44,11 +47,15 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -148,9 +155,11 @@ int32_t main(void)
 
     /* Check IAP mode */
     u32Cfg = FMC_Read(FMC_CONFIG_BASE);
-    if((u32Cfg & 0xc0) != 0x80) {
+    if((u32Cfg & 0xc0) != 0x80)
+    {
         printf("Do you want to set to new IAP mode (APROM boot + LDROM)?\n");
-        if(getchar() == 'y') {
+        if(getchar() == 'y')
+        {
             FMC->ISPCON |= FMC_ISPCON_CFGUEN_Msk; /* Enable user configuration update */
 
             /* Set CBS to b'10 */
@@ -165,7 +174,9 @@ int32_t main(void)
             getchar();
             SYS->IPRSTC1 = 0x1; /* Reset MCU */
             while(1);
-        } else {
+        }
+        else
+        {
             printf("VECMAP only valid in new IAP mode. CBS = 10'b or 00'b\n");
             goto lexit;
         }
@@ -180,22 +191,23 @@ int32_t main(void)
     printf("[Others] Boot, base = 0x0\n");
 
     ch = getchar();
-    switch(ch) {
-    case '0':
-        FMC_SetVectorPageAddr(0x1000);
-        break;
-    case '1':
-        FMC_SetVectorPageAddr(0x2000);
-        break;
-    case '2':
-        FMC_SetVectorPageAddr(0x3000);
-        break;
-    case '3':
-        FMC_SetVectorPageAddr(0x100000);
-        break;
-    default:
-        FMC_SetVectorPageAddr(0x0);
-        break;
+    switch(ch)
+    {
+        case '0':
+            FMC_SetVectorPageAddr(0x1000);
+            break;
+        case '1':
+            FMC_SetVectorPageAddr(0x2000);
+            break;
+        case '2':
+            FMC_SetVectorPageAddr(0x3000);
+            break;
+        case '3':
+            FMC_SetVectorPageAddr(0x100000);
+            break;
+        default:
+            FMC_SetVectorPageAddr(0x0);
+            break;
     }
 #else
     printf("Select one boot image: \n");
@@ -206,22 +218,23 @@ int32_t main(void)
     printf("[Others] Boot, base = 0x0\n");
 
     ch = getchar();
-    switch(ch) {
-    case '0':
-        FMC_SetVectorPageAddr(0x2000);
-        break;
-    case '1':
-        FMC_SetVectorPageAddr(0x4000);
-        break;
-    case '2':
-        FMC_SetVectorPageAddr(0x6000);
-        break;
-    case '3':
-        FMC_SetVectorPageAddr(0x100000);
-        break;
-    default:
-        FMC_SetVectorPageAddr(0x0);
-        break;
+    switch(ch)
+    {
+        case '0':
+            FMC_SetVectorPageAddr(0x2000);
+            break;
+        case '1':
+            FMC_SetVectorPageAddr(0x4000);
+            break;
+        case '2':
+            FMC_SetVectorPageAddr(0x6000);
+            break;
+        case '3':
+            FMC_SetVectorPageAddr(0x100000);
+            break;
+        default:
+            FMC_SetVectorPageAddr(0x0);
+            break;
     }
 #endif
 
@@ -244,7 +257,3 @@ lexit:
     printf("\nDone\n");
     while(SYS->PDID) __WFI();
 }
-
-
-
-

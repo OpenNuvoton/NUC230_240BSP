@@ -35,6 +35,7 @@ void AutoFlow_FunctionRxTest(void);
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -43,7 +44,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -56,14 +59,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
@@ -171,7 +178,8 @@ void UART1_IRQHandler(void)
     volatile uint32_t u32IntSts = UART1->ISR;;
 
     /* Rx Ready or Time-out INT */
-    if(UART_GET_INT_FLAG(UART1, UART_ISR_RDA_INT_Msk) ||  UART_GET_INT_FLAG(UART1, UART_ISR_TOUT_INT_Msk)) {
+    if(UART_GET_INT_FLAG(UART1, UART_ISR_RDA_INT_Msk) ||  UART_GET_INT_FLAG(UART1, UART_ISR_TOUT_INT_Msk))
+    {
         /* Handle received data */
         g_u8RecData[g_i32pointer] = UART_READ(UART1);
         g_i32pointer++;
@@ -237,15 +245,17 @@ void AutoFlow_FunctionRxTest()
     while(g_i32pointer < RXBUFSIZE);
 
     /* Compare Data */
-    for(u32i = 0; u32i < RXBUFSIZE; u32i++) {
-        if(g_u8RecData[u32i] != (u32i & 0xFF)) {
+    for(u32i = 0; u32i < RXBUFSIZE; u32i++)
+    {
+        if(g_u8RecData[u32i] != (u32i & 0xFF))
+        {
             u32Err = 1;
             break;
 
         }
     }
 
-    if( u32Err )
+    if(u32Err)
         printf("Compare Data Failed\n");
     else
         printf("\n Receive OK & Check OK\n");

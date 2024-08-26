@@ -37,6 +37,7 @@ void UART_FunctionTest(void);
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -45,7 +46,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_HIRC;
@@ -58,14 +61,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 = (CLK->CLKSEL0 & (~CLK_CLKSEL0_HCLK_S_Msk)) | CLK_CLKSEL0_HCLK_S_PLL;
 
     /* Update System Core Clock */
@@ -161,22 +168,26 @@ void UART_TEST_HANDLE()
     uint32_t u32TimeOutCnt;
 
     /* Receive Data Available Interrupt Handle */
-    if(u32IntSts & UART_ISR_RDA_INT_Msk) {
+    if(u32IntSts & UART_ISR_RDA_INT_Msk)
+    {
         printf("\nInput:");
 
         /* Get all the input characters */
-        while(UART0->ISR & UART_ISR_RDA_IF_Msk) {
+        while(UART0->ISR & UART_ISR_RDA_IF_Msk)
+        {
             /* Get the character from UART Buffer */
             u8InChar = UART0->RBR;
 
             printf("%c ", u8InChar);
 
-            if(u8InChar == '0') {
+            if(u8InChar == '0')
+            {
                 g_bWait = FALSE;
             }
 
             /* Check if buffer full */
-            if(g_u32comRbytes < RXBUFSIZE) {
+            if(g_u32comRbytes < RXBUFSIZE)
+            {
                 /* Enqueue the character */
                 g_u8RecData[g_u32comRtail] = u8InChar;
                 g_u32comRtail = (g_u32comRtail == (RXBUFSIZE - 1)) ? 0 : (g_u32comRtail + 1);
@@ -187,10 +198,12 @@ void UART_TEST_HANDLE()
     }
 
     /* Transmit Holding Register Empty Interrupt Handle */
-    if(u32IntSts & UART_ISR_THRE_INT_Msk) {
+    if(u32IntSts & UART_ISR_THRE_INT_Msk)
+    {
         uint16_t tmp;
         tmp = g_u32comRtail;
-        if(g_u32comRhead != tmp) {
+        if(g_u32comRhead != tmp)
+        {
             u8InChar = g_u8RecData[g_u32comRhead];
             u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
             while(UART_IS_TX_FULL(UART0))    /* Wait Tx is not full to transmit data */
@@ -234,4 +247,3 @@ void UART_FunctionTest()
     printf("\nUART Sample Demo End.\n");
 
 }
-

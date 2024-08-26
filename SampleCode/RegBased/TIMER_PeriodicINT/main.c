@@ -32,7 +32,8 @@ volatile uint32_t g_au32TMRINTCount[4] = {0};
  */
 void TMR0_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER0) == 1) {
+    if(TIMER_GetIntFlag(TIMER0) == 1)
+    {
         /* Clear Timer0 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER0);
 
@@ -51,7 +52,8 @@ void TMR0_IRQHandler(void)
  */
 void TMR1_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER1) == 1) {
+    if(TIMER_GetIntFlag(TIMER1) == 1)
+    {
         /* Clear Timer1 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER1);
 
@@ -70,7 +72,8 @@ void TMR1_IRQHandler(void)
  */
 void TMR2_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER2) == 1) {
+    if(TIMER_GetIntFlag(TIMER2) == 1)
+    {
         /* Clear Timer2 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER2);
 
@@ -89,7 +92,8 @@ void TMR2_IRQHandler(void)
  */
 void TMR3_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER3) == 1) {
+    if(TIMER_GetIntFlag(TIMER3) == 1)
+    {
         /* Clear Timer3 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER3);
 
@@ -99,6 +103,7 @@ void TMR3_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -106,7 +111,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -118,18 +125,24 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk | CLK_PWRCON_OSC10K_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC10K_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC10K_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -236,15 +249,18 @@ int main(void)
 
     /* Check Timer0 ~ Timer3 interrupt counts */
     printf("# Timer interrupt counts :\n");
-    while(u32InitCount < 20) {
-        if(g_au32TMRINTCount[0] != u32InitCount) {
+    while(u32InitCount < 20)
+    {
+        if(g_au32TMRINTCount[0] != u32InitCount)
+        {
             printf("TMR0:%3d    TMR1:%3d    TMR2:%3d    TMR3:%3d\n",
                    g_au32TMRINTCount[0], g_au32TMRINTCount[1], g_au32TMRINTCount[2], g_au32TMRINTCount[3]);
             u32InitCount = g_au32TMRINTCount[0];
 
             if((g_au32TMRINTCount[1] > (g_au32TMRINTCount[0] * 2 + 1)) || (g_au32TMRINTCount[1] < (g_au32TMRINTCount[0] * 2 - 1)) ||
                     (g_au32TMRINTCount[2] > (g_au32TMRINTCount[0] * 4 + 1)) || (g_au32TMRINTCount[2] < (g_au32TMRINTCount[0] * 4 - 1)) ||
-                    (g_au32TMRINTCount[3] > (g_au32TMRINTCount[0] * 8 + 1)) || (g_au32TMRINTCount[3] < (g_au32TMRINTCount[0] * 8 - 1))) {
+                    (g_au32TMRINTCount[3] > (g_au32TMRINTCount[0] * 8 + 1)) || (g_au32TMRINTCount[3] < (g_au32TMRINTCount[0] * 8 - 1)))
+            {
                 printf("*** FAIL ***\n");
                 goto lexit;
             }

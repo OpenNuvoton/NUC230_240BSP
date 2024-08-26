@@ -33,7 +33,8 @@ volatile uint32_t g_u32RTCTickINT;
 void RTC_IRQHandler(void)
 {
     /* To check if RTC Tick interrupt occurred */
-    if(RTC_GET_TICK_INT_FLAG() == 1) {
+    if(RTC_GET_TICK_INT_FLAG() == 1)
+    {
         /* Clear RTC tick interrupt flag */
         RTC_CLEAR_TICK_INT_FLAG();
 
@@ -45,6 +46,7 @@ void RTC_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -52,7 +54,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -64,15 +68,22 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk | CLK_PWRCON_XTL32K_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL32K_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL32K_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
@@ -136,11 +147,14 @@ int main(void)
     printf("+-----------------------------------------+\n\n");
 
     /* Initial RTC and stay in normal state */
-    if(RTC->INIR != 0x1) {
+    if(RTC->INIR != 0x1)
+    {
         RTC->INIR = RTC_INIT_KEY;
         u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
-        while(RTC->INIR != 0x1) {
-            if(--u32TimeOutCnt == 0) {
+        while(RTC->INIR != 0x1)
+        {
+            if(--u32TimeOutCnt == 0)
+            {
                 printf("\n RTC initial fail!!");
                 printf("\n Please check h/w setting!!");
                 goto lexit;
@@ -169,8 +183,10 @@ int main(void)
 
     u32Sec = 0;
     g_u32RTCTickINT = 0;
-    while(1) {
-        if(g_u32RTCTickINT == 4) {
+    while(1)
+    {
+        if(g_u32RTCTickINT == 4)
+        {
             g_u32RTCTickINT = 0;
 
             /* Read current RTC date/time */
@@ -180,7 +196,8 @@ int main(void)
 
             /* Check RTC tick period time is reasonable or not */
             u32CurSec = (((RTC->TLR & RTC_TLR_10SEC_Msk) >> RTC_TLR_10SEC_Pos) * 10) + (RTC->TLR & RTC_TLR_1SEC_Msk);
-            if(u32Sec == u32CurSec) {
+            if(u32Sec == u32CurSec)
+            {
                 printf("\nRTC tick period time is incorrect.\n");
                 goto lexit;
             }

@@ -36,7 +36,7 @@ __root const uint32_t g_funcTable[4] =
 } ;
 #else
 #if defined(__GNUC_LD_IAP__)
-const uint32_t __attribute__((section (".IAPFunTable"))) g_funcTable[4] =
+const uint32_t __attribute__((section(".IAPFunTable"))) g_funcTable[4] =
 {
     (uint32_t)IAP_Func0, (uint32_t)IAP_Func1, (uint32_t)IAP_Func2, (uint32_t)IAP_Func3
 };
@@ -48,7 +48,10 @@ const uint32_t * __attribute__((section(".ARM.__at_0x00100E00"))) g_funcTable[4]
 #endif
 #endif
 
-void ProcessHardFault(void){ while(1); /* Halt here if hard fault occurs. */ }
+void ProcessHardFault(void)
+{
+    while(1); /* Halt here if hard fault occurs. */
+}
 
 void SysTickDelay(uint32_t us)
 {
@@ -62,6 +65,7 @@ void SysTickDelay(uint32_t us)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -70,7 +74,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -82,11 +88,15 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -237,7 +247,3 @@ int32_t main(void)
     while(SYS->PDID)__WFI();
 #endif
 }
-
-
-
-

@@ -34,6 +34,7 @@ volatile uint32_t g_u32AdcCmp1IntFlag;
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -42,7 +43,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -52,14 +55,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -206,9 +213,12 @@ void AdcResultMonitorTest()
     ADC->ADCMPR[(0)] &= ~ADC_ADCMPR_CMPEN_Msk;
     ADC->ADCMPR[(1)] &= ~ADC_ADCMPR_CMPEN_Msk;
 
-    if(g_u32AdcCmp0IntFlag == 1) {
+    if(g_u32AdcCmp0IntFlag == 1)
+    {
         printf("Comparator 0 interrupt occurs.\nThe conversion result of channel 2 is less than 0x800\n");
-    } else {
+    }
+    else
+    {
         printf("Comparator 1 interrupt occurs.\nThe conversion result of channel 2 is greater than or equal to 0x800\n");
     }
 }
@@ -219,12 +229,14 @@ void AdcResultMonitorTest()
 /*---------------------------------------------------------------------------------------------------------*/
 void ADC_IRQHandler(void)
 {
-    if(ADC->ADSR & ADC_ADSR_CMPF0_Msk) {
+    if(ADC->ADSR & ADC_ADSR_CMPF0_Msk)
+    {
         g_u32AdcCmp0IntFlag = 1;
         ADC->ADSR = ADC_ADSR_CMPF0_Msk;     /* clear the A/D compare flag 0 */
     }
 
-    if(ADC->ADSR & ADC_ADSR_CMPF1_Msk) {
+    if(ADC->ADSR & ADC_ADSR_CMPF1_Msk)
+    {
         g_u32AdcCmp1IntFlag = 1;
         ADC->ADSR = ADC_ADSR_CMPF1_Msk;     /* clear the A/D compare flag 1 */
     }
@@ -273,4 +285,3 @@ int32_t main(void)
     while(1);
 
 }
-

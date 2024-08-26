@@ -225,6 +225,7 @@ void I2C_MasterTx(uint32_t u32Status)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -233,7 +234,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -245,14 +248,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -371,7 +378,8 @@ int32_t Read_Write_SLAVE(uint8_t slvaddr)
                     /* Set MasterTx abort flag*/
                     g_u8MstTxAbortFlag = 1;
                 }
-            } while(g_u8MstEndFlag == 0 && g_u8MstTxAbortFlag == 0);
+            }
+            while(g_u8MstEndFlag == 0 && g_u8MstTxAbortFlag == 0);
 
             g_u8MstEndFlag = 0;
 
@@ -394,7 +402,8 @@ int32_t Read_Write_SLAVE(uint8_t slvaddr)
 
 
             /* Wait I2C Rx Finish or Unexpected Abort*/
-            do {
+            do
+            {
                 if(g_u8TimeoutFlag)
                 {
                     /* When I2C timeout, reset IP*/
@@ -406,10 +415,11 @@ int32_t Read_Write_SLAVE(uint8_t slvaddr)
                     /* Set MasterRx abort flag*/
                     g_u8MstRxAbortFlag = 1;
                 }
-            } while(g_u8MstEndFlag == 0 && g_u8MstRxAbortFlag == 0);
+            }
+            while(g_u8MstEndFlag == 0 && g_u8MstRxAbortFlag == 0);
             g_u8MstEndFlag = 0;
 
-            if(g_u8MstRxAbortFlag )
+            if(g_u8MstRxAbortFlag)
             {
                 /* Clear MasterRx abort flag*/
                 g_u8MstRxAbortFlag = 0;
@@ -418,7 +428,8 @@ int32_t Read_Write_SLAVE(uint8_t slvaddr)
                 break;
             }
         }
-    } while(g_u8MstReStartFlag); /*If unexpected abort happens, re-start the transmition*/
+    }
+    while(g_u8MstReStartFlag);   /*If unexpected abort happens, re-start the transmition*/
 
     /* Compare data */
     if(g_u8MstRxData != g_au8MstTxData[2])
@@ -495,6 +506,3 @@ int32_t main(void)
 
     while(1);
 }
-
-
-

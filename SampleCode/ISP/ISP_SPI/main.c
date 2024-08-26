@@ -14,9 +14,12 @@
 #define PLLCON_SETTING  CLK_PLLCON_72MHz_HIRC
 #define PLL_CLOCK       71884800
 
-void ProcessHardFault(void) { while(1); /* Halt here if hard fault occurs. */ }
-void SH_Return(void){}
-	
+void ProcessHardFault(void)
+{
+    while(1); /* Halt here if hard fault occurs. */
+}
+void SH_Return(void) {}
+
 uint32_t TIMER_Open(TIMER_T *timer, uint32_t u32Mode, uint32_t u32Freq)
 {
     uint32_t u32Clk = __HIRC; // TIMER_GetModuleClock(timer);
@@ -120,7 +123,7 @@ int32_t main(void)
     /* Unlock protected registers */
     SYS_UnlockReg();
     /* Init System, peripheral clock and multi-function I/O */
-    if( SYS_Init() < 0 ) goto _APROM;
+    if(SYS_Init() < 0) goto _APROM;
     SPI_Init();
     GPIO_Init();
     TIMER3_Init();

@@ -59,8 +59,10 @@ uint32_t g_cnt = 0;
 
 void SysTick_Handler(void)
 {
-    if(g_opMode == PS2MOD_STREAM && g_dataReportEnable) {
-        if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+    if(g_opMode == PS2MOD_STREAM && g_dataReportEnable)
+    {
+        if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+        {
             /* Calculate cursor moving data */
             g_cnt++;
             if(g_cnt < 101)
@@ -89,7 +91,8 @@ void PS2_IRQHandler(void)
     uint32_t u32TxData;
 
     /* RXINT */
-    if(PS2_GET_INT_FLAG(PS2_PS2INTID_RXINT_Msk)) {
+    if(PS2_GET_INT_FLAG(PS2_PS2INTID_RXINT_Msk))
+    {
         /* Clear PS2 Receive Interrupt flag */
         PS2_CLR_RX_INT_FLAG();
 
@@ -98,9 +101,11 @@ void PS2_IRQHandler(void)
 
         printf("\n u32RxData = 0x%x \n", u32RxData);
 
-        if(g_cmd[0]) {
+        if(g_cmd[0])
+        {
             /* If g_cmd[0] is not 0, it should be in data phase */
-            if(g_cmd[0] == PS2CMD_SET_SAMPLE_RATE) {
+            if(g_cmd[0] == PS2CMD_SET_SAMPLE_RATE)
+            {
                 printf("Host->Device: Set sample rate data %d\n", u32RxData);
 
                 if(u32RxData < 10)   u32RxData = 10;
@@ -109,11 +114,14 @@ void PS2_IRQHandler(void)
                 g_cmd[0] = 0;
 
                 /* Wait Tx ready */
-                if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                {
                     printf("Device->Host: ACK\n");
 
                     PS2_Write(&u32PS2ACK, 1);
-                } else {
+                }
+                else
+                {
                     printf("Something wrong!! Stop code!\n");
 
                     PS2_SET_CLK_LOW();
@@ -123,7 +131,9 @@ void PS2_IRQHandler(void)
                     return;
                 }
 
-            } else if(g_cmd[0] == PS2CMD_SET_RESOLUTION) {
+            }
+            else if(g_cmd[0] == PS2CMD_SET_RESOLUTION)
+            {
                 printf("Host->Device: Set resolution data %d\n", u32RxData);
 
                 if(u32RxData < 1) u32RxData = 1;
@@ -132,11 +142,14 @@ void PS2_IRQHandler(void)
                 g_cmd[0] = 0;
 
                 /* Wait Tx ready */
-                if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                {
                     PS2_Write(&u32PS2ACK, 1);
 
                     printf("Device->Host: ACK\n");
-                } else {
+                }
+                else
+                {
                     printf("Something Wrong!! Stop code!\n");
 
                     PS2_SET_CLK_LOW();
@@ -146,11 +159,15 @@ void PS2_IRQHandler(void)
                     return;
                 }
             }
-        } else {
+        }
+        else
+        {
             /* Only support PS2CMD_DISABLE_DATA_REPORT command when data report enabled */
-            if((u32RxData == PS2CMD_DISABLE_DATA_REPORT) || (g_dataReportEnable == 0)) {
+            if((u32RxData == PS2CMD_DISABLE_DATA_REPORT) || (g_dataReportEnable == 0))
+            {
                 /* Process the command phase */
-                if(u32RxData == PS2CMD_RESET) {
+                if(u32RxData == PS2CMD_RESET)
+                {
                     printf("Host->Device: Reset\n");
 
                     /* Reset command */
@@ -161,26 +178,32 @@ void PS2_IRQHandler(void)
                     PS2_CLEAR_TX_FIFO();
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         u32TxData = ((DEVICE_ID << 16) | (u32PS2PASS << 8) | u32PS2ACK);
                         PS2_Write(&u32TxData, 3);
 
                         printf("Device->Host: ACK\n");
                     }
 
-                } else if(u32RxData == PS2CMD_SET_SAMPLE_RATE) {
+                }
+                else if(u32RxData == PS2CMD_SET_SAMPLE_RATE)
+                {
                     printf("Host->Device: Set sample rate\n");
 
                     /* Set sample rate */
                     g_cmd[0] = PS2CMD_SET_SAMPLE_RATE;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_GET_DEVICE_ID) {
+                }
+                else if(u32RxData == PS2CMD_GET_DEVICE_ID)
+                {
                     printf("Host->Device: Get device ID\n");
 
                     g_cmd[0] = 0;
@@ -188,37 +211,46 @@ void PS2_IRQHandler(void)
                     printf("(PS2->STATUS).TXEMPTY is (%0x)\n", (unsigned int)((PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) >> PS2_PS2STATUS_TXEMPTY_Pos));
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         u32TxData = ((DEVICE_ID << 8) | u32PS2ACK);
                         PS2_Write(&u32TxData, 2);
 
                         printf("Device->Host: ACK + Device ID(0x%x)\n", DEVICE_ID);
                     }
-                } else if(u32RxData == PS2CMD_SET_SCALLING2) {
+                }
+                else if(u32RxData == PS2CMD_SET_SCALLING2)
+                {
                     printf("Host->Device: Set scaling 2\n");
 
                     g_scalling = 2;
                     g_cmd[0] = 0;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_SET_SCALLING1) {
+                }
+                else if(u32RxData == PS2CMD_SET_SCALLING1)
+                {
                     printf("Host->Device: Set scaling 1\n");
 
                     g_scalling = 1;
                     g_cmd[0] = 0;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_ENABLE_DATA_REPORT) {
+                }
+                else if(u32RxData == PS2CMD_ENABLE_DATA_REPORT)
+                {
                     printf("Host->Device: Enable data report\n");
 
                     g_dataReportEnable = 1;
@@ -229,12 +261,15 @@ void PS2_IRQHandler(void)
                     SysTick_Config(SystemCoreClock / g_sampleRate);
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_DISABLE_DATA_REPORT) {
+                }
+                else if(u32RxData == PS2CMD_DISABLE_DATA_REPORT)
+                {
                     printf("Host->Device: Disable data report\n");
 
                     g_dataReportEnable = 0;
@@ -243,29 +278,36 @@ void PS2_IRQHandler(void)
                     SysTick->CTRL = 0;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_SET_RESOLUTION) {
+                }
+                else if(u32RxData == PS2CMD_SET_RESOLUTION)
+                {
                     printf("Host->Device: Set resolution\n");
 
                     g_cmd[0] = PS2CMD_SET_RESOLUTION;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         PS2_Write(&u32PS2ACK, 1);
 
                         printf("Device->Host: ACK\n");
                     }
-                } else if(u32RxData == PS2CMD_STATUS_REQUEST) {
+                }
+                else if(u32RxData == PS2CMD_STATUS_REQUEST)
+                {
                     printf("Host->Device: PS2CMD_STATUS_REQUEST\n");
 
                     g_cmd[0] = 0;
 
                     /* Wait Tx ready */
-                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk) {
+                    if(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)
+                    {
                         u32TxData = ((0x64 << 24) | u32PS2ACK);
                         PS2_Write(&u32TxData, 4);
 
@@ -277,7 +319,8 @@ void PS2_IRQHandler(void)
     }
 
     /* TXINT */
-    if(PS2_GET_INT_FLAG(PS2_PS2INTID_TXINT_Msk)) {
+    if(PS2_GET_INT_FLAG(PS2_PS2INTID_TXINT_Msk))
+    {
         PS2_CLR_TX_INT_FLAG();
     }
 
@@ -286,6 +329,7 @@ void PS2_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -294,7 +338,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -306,14 +352,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -421,7 +471,8 @@ int32_t PS2_Write(uint32_t *pu32Buf, uint32_t u32ByteCount)
     if(remainder) txcnt++;
 
     u32delayno = 0;
-    while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk)) {
+    while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk))
+    {
         u32delayno++;
         if(u32delayno >= 0xF0000000)
             return FALSE; // Time Out
@@ -430,9 +481,11 @@ int32_t PS2_Write(uint32_t *pu32Buf, uint32_t u32ByteCount)
     if(u32ByteCount >= u32TxFIFO_Depth)//Tx fifo is 16 bytes
         PS2_SET_TX_BYTE_CNT(u32TxFIFO_Depth);
 
-    do {
+    do
+    {
         u32delayno = 0;
-        while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk)) {
+        while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk))
+        {
             u32delayno++;
             if(u32delayno >= 0xF0000000)
                 return FALSE; // Time Out
@@ -448,10 +501,12 @@ int32_t PS2_Write(uint32_t *pu32Buf, uint32_t u32ByteCount)
 
         i = i + 16;
 
-    } while(--txcnt);
+    }
+    while(--txcnt);
 
     u32delayno = 0;
-    while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk)) {
+    while(!(PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk))
+    {
         u32delayno++;
         if(u32delayno >= 0xF0000000)
             return FALSE; // Time Out
@@ -489,8 +544,10 @@ int main(void)
     printf("|    screen.                                                |\n");
     printf("+-----------------------------------------------------------+\n");
 
-    while(1) {
-        if(g_opMode == PS2MOD_RESET) {
+    while(1)
+    {
+        if(g_opMode == PS2MOD_RESET)
+        {
             /* Reset to default configuration */
             g_sampleRate = 100;
             g_resolution = 4;
@@ -503,14 +560,16 @@ int main(void)
             /* Report 0xAA for successful self-test or 0xFC for error */
 
             /* Waiting for transmit */
-            while(!(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk)) {
+            while(!(PS2_GET_STATUS() & PS2_PS2STATUS_TXEMPTY_Msk))
+            {
                 printf("B4 PS2PASS CHECK!!\n");
             }
 
             PS2_Write(&u32PS2PASS, 1);
 
             /* Report device ID */
-            while((PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk) == 0) {
+            while((PS2->PS2STATUS & PS2_PS2STATUS_TXEMPTY_Msk) == 0)
+            {
                 printf("B4 DEVICE_ID CHECK!!\n");
             }
 
@@ -526,7 +585,3 @@ int main(void)
         }
     }
 }
-
-
-
-

@@ -27,6 +27,7 @@ void AdcContScanModeTest(void);
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -35,7 +36,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -45,14 +48,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -171,13 +178,15 @@ void AdcContScanModeTest()
 
     printf("\nIn this test, software will get 2 cycles of conversion result from the specified channels.\n");
 
-    while(1) {
+    while(1)
+    {
         printf("\n\nSelect input mode:\n");
         printf("  [1] Single end input (channel 0, 1, 2 and 3)\n");
         printf("  [2] Differential input (input channel pair 0 and 1)\n");
         printf("  Other keys: exit continuous scan mode test\n");
         u8Option = getchar();
-        if(u8Option == '1') {
+        if(u8Option == '1')
+        {
             /* Set the ADC operation mode as continuous scan, input mode as single-end and enable the ADC converter */
             ADC->ADCR = (ADC_ADCR_ADMD_CONTINUOUS | ADC_ADCR_DIFFEN_SINGLE_END | ADC_ADCR_ADEN_CONVERTER_ENABLE);
             /* Enable analog input channel 0, 1, 2 and 3 */
@@ -203,7 +212,8 @@ void AdcContScanModeTest()
             /* Clear the ADC interrupt flag */
             ADC->ADSR = ADC_ADSR_ADF_Msk;
 
-            for(u32ChannelCount = 0; u32ChannelCount < 4; u32ChannelCount++) {
+            for(u32ChannelCount = 0; u32ChannelCount < 4; u32ChannelCount++)
+            {
                 i32ConversionData = (ADC->ADDR[(u32ChannelCount)] & ADC_ADDR_RSLT_Msk) >> ADC_ADDR_RSLT_Pos;
                 printf("Conversion result of channel %d: 0x%X (%d)\n", u32ChannelCount, i32ConversionData, i32ConversionData);
             }
@@ -222,7 +232,8 @@ void AdcContScanModeTest()
             /* Stop A/D conversion */
             ADC->ADCR &= ~ADC_ADCR_ADST_Msk;
 
-            for(u32ChannelCount = 0; u32ChannelCount < 4; u32ChannelCount++) {
+            for(u32ChannelCount = 0; u32ChannelCount < 4; u32ChannelCount++)
+            {
                 i32ConversionData = (ADC->ADDR[(u32ChannelCount)] & ADC_ADDR_RSLT_Msk) >> ADC_ADDR_RSLT_Pos;
                 printf("Conversion result of channel %d: 0x%X (%d)\n", u32ChannelCount, i32ConversionData, i32ConversionData);
             }
@@ -230,7 +241,9 @@ void AdcContScanModeTest()
             /* Clear the ADC interrupt flag */
             ADC->ADSR = ADC_ADSR_ADF_Msk;
 
-        } else if(u8Option == '2') {
+        }
+        else if(u8Option == '2')
+        {
             /* Set the ADC operation mode as continuous scan, input mode as differential and enable the ADC converter */
             ADC->ADCR = (ADC_ADCR_ADMD_CONTINUOUS | ADC_ADCR_DIFFEN_DIFFERENTIAL | ADC_ADCR_ADEN_CONVERTER_ENABLE);
             /* Enable analog input channel 0 and 2 */
@@ -256,7 +269,8 @@ void AdcContScanModeTest()
             /* Clear the ADC interrupt flag */
             ADC->ADSR = ADC_ADSR_ADF_Msk;
 
-            for(u32ChannelCount = 0; u32ChannelCount < 2; u32ChannelCount++) {
+            for(u32ChannelCount = 0; u32ChannelCount < 2; u32ChannelCount++)
+            {
                 i32ConversionData = (ADC->ADDR[(u32ChannelCount * 2)] & ADC_ADDR_RSLT_Msk) >> ADC_ADDR_RSLT_Pos;
                 printf("Conversion result of differential input pair %d: 0x%X (%d)\n", u32ChannelCount, i32ConversionData, i32ConversionData);
             }
@@ -275,7 +289,8 @@ void AdcContScanModeTest()
             /* Stop A/D conversion */
             ADC->ADCR &= ~ADC_ADCR_ADST_Msk;
 
-            for(u32ChannelCount = 0; u32ChannelCount < 2; u32ChannelCount++) {
+            for(u32ChannelCount = 0; u32ChannelCount < 2; u32ChannelCount++)
+            {
                 i32ConversionData = (ADC->ADDR[(u32ChannelCount * 2)] & ADC_ADDR_RSLT_Msk) >> ADC_ADDR_RSLT_Pos;
                 printf("Conversion result of differential input pair %d: 0x%X (%d)\n", u32ChannelCount, i32ConversionData, i32ConversionData);
             }
@@ -283,7 +298,8 @@ void AdcContScanModeTest()
             /* Clear the ADC interrupt flag */
             ADC->ADSR = ADC_ADSR_ADF_Msk;
 
-        } else
+        }
+        else
             return ;
 
     }
@@ -336,4 +352,3 @@ int32_t main(void)
     while(1);
 
 }
-

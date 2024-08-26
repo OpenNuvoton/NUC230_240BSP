@@ -26,7 +26,8 @@ volatile uint32_t g_au32TMRINTCount[4] = {0};
 /*---------------------------------------------------------------------------------------------------------*/
 void GenerateGPIOBCounter(uint32_t u32Pin, uint32_t u32Counts)
 {
-    while(u32Counts--) {
+    while(u32Counts--)
+    {
         GPIO_PIN_DATA(1, u32Pin) = 1;
         GPIO_PIN_DATA(1, u32Pin) = 0;
     }
@@ -43,7 +44,8 @@ void GenerateGPIOBCounter(uint32_t u32Pin, uint32_t u32Counts)
  */
 void TMR1_IRQHandler(void)
 {
-    if(TIMER_GetIntFlag(TIMER1) == 1) {
+    if(TIMER_GetIntFlag(TIMER1) == 1)
+    {
         /* Clear Timer1 time-out interrupt flag */
         TIMER_ClearIntFlag(TIMER1);
 
@@ -53,6 +55,7 @@ void TMR1_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -60,7 +63,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -72,17 +77,21 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
-    
+
     /* Switch HCLK clock source to PLL, STCLK to HCLK/2 */
     CLK->CLKSEL0 = CLK_CLKSEL0_STCLK_S_HCLK_DIV2 | CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -164,7 +173,8 @@ int main(void)
     TIMER1->TCSR = TIMER_TCSR_CEN_Msk | TIMER_TCSR_IE_Msk | TIMER_TCSR_CTB_Msk | TIMER_CONTINUOUS_MODE;
 
     /* To check if TDR of Timer1 must be 0 as default value */
-    if(TIMER_GetCounter(TIMER1) != 0) {
+    if(TIMER_GetCounter(TIMER1) != 0)
+    {
         printf("Default counter value is not 0. (%d)\n", TIMER_GetCounter(TIMER1));
         goto lexit;
     }
@@ -173,15 +183,18 @@ int main(void)
     GenerateGPIOBCounter(8, 1);
 
     u32Loop = 0;
-    while(TIMER_GetCounter(TIMER1) == 0) {
-        if(u32Loop++ > SystemCoreClock/1000) {
+    while(TIMER_GetCounter(TIMER1) == 0)
+    {
+        if(u32Loop++ > SystemCoreClock / 1000)
+        {
             printf("Time-out error. Please check counter input source.\n");
             goto lexit;
         }
     }
 
     /* To check if TDR of Timer1 must be 1 */
-    if(TIMER_GetCounter(TIMER1) != 1) {
+    if(TIMER_GetCounter(TIMER1) != 1)
+    {
         printf("Get unexpected counter value. (%d)\n", TIMER_GetCounter(TIMER1));
         goto lexit;
     }
@@ -190,13 +203,16 @@ int main(void)
     GenerateGPIOBCounter(8, (56789 - 1));
 
     u32Loop = 0;
-    while(1) {
-        if((g_au32TMRINTCount[1] == 1) && (TIMER_GetCounter(TIMER1) == 56789)) {
+    while(1)
+    {
+        if((g_au32TMRINTCount[1] == 1) && (TIMER_GetCounter(TIMER1) == 56789))
+        {
             printf("Timer1 external counter input function ... PASS.\n");
             break;
         }
 
-        if(u32Loop++ > SystemCoreClock) {
+        if(u32Loop++ > SystemCoreClock)
+        {
             printf("Timer1 external counter input function ... FAIL.\n");
             break;
         }

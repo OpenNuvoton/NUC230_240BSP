@@ -32,13 +32,15 @@ volatile uint32_t g_u32WWDTINTCount = 0;
  */
 void WDT_IRQHandler(void)
 {
-    if(WWDT_GET_INT_FLAG() == 1) {
+    if(WWDT_GET_INT_FLAG() == 1)
+    {
         /* Clear WWDT compare match interrupt flag */
         WWDT_CLEAR_INT_FLAG();
 
         g_u32WWDTINTCount++;
 
-        if(g_u32WWDTINTCount < 10) {
+        if(g_u32WWDTINTCount < 10)
+        {
             /* To reload the WWDT counter value to 0x3F */
             WWDT_RELOAD_COUNTER();
         }
@@ -49,6 +51,7 @@ void WDT_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -56,7 +59,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -66,16 +71,20 @@ void SYS_Init(void)
 
     /* Enable external 12 MHz XTAL */
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
-    
+
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
@@ -135,7 +144,8 @@ int main(void)
     /* Init UART0 for printf */
     UART0_Init();
 
-    if(WWDT_GET_RESET_FLAG() == 1) {
+    if(WWDT_GET_RESET_FLAG() == 1)
+    {
         WWDT_CLEAR_RESET_FLAG();
         printf("\n\n*** WWDT time-out reset occurred. [WWDTCR: 0x%08X] ***\n", WWDT->WWDTCR);
         while(1);

@@ -67,7 +67,8 @@ uint32_t SCUART_Write(SC_T* sc, uint8_t *pu8TxBuf, uint32_t u32WriteBytes)
 {
     uint32_t u32Count, u32TimeOutCnt;;
 
-    for(u32Count = 0; u32Count != u32WriteBytes; u32Count++) {
+    for(u32Count = 0; u32Count != u32WriteBytes; u32Count++)
+    {
 
         /* Wait 'til FIFO not full */
         u32TimeOutCnt = SystemCoreClock; /* 1 second time-out */
@@ -106,6 +107,7 @@ void SC012_IRQHandler(void)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -113,7 +115,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_IRC22M_EN_Msk;
 
     /* Waiting for IRC22M clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_IRC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to HIRC */
     CLK->CLKSEL0 = CLK_CLKSEL0_HCLK_S_HIRC;
@@ -125,14 +129,18 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Enable PLL and Set PLL frequency */
     CLK->PLLCON = PLLCON_SETTING;
 
     /* Waiting for clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
-    
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
+
     /* System optimization when CPU runs at 72MHz */
     FMC->FATCON |= 0x50;
 
@@ -163,7 +171,7 @@ void SYS_Init(void)
     /* Set PB multi-function pins for UART0 RXD, TXD */
     SYS->GPB_MFP &= ~(SYS_GPB_MFP_PB0_Msk | SYS_GPB_MFP_PB1_Msk);
     SYS->GPB_MFP |= (SYS_GPB_MFP_PB0_UART0_RXD | SYS_GPB_MFP_PB1_UART0_TXD);
-    
+
     /* Set PA multi-function pins for SC UART mode */
     SYS->GPA_MFP &= ~(SYS_GPA_MFP_PA2_Msk | SYS_GPA_MFP_PA3_Msk);
     SYS->GPA_MFP |= SYS_GPA_MFP_PA2_SC0_CLK | SYS_GPA_MFP_PA3_SC0_DAT;
@@ -214,7 +222,7 @@ int main(void)
 
     // Open smartcard interface 0 in UART mode.
     SCUART_Open(SC0, 115200);
-    
+
     // Enable receive interrupt
     SCUART_ENABLE_INT(SC0, SC_IER_RDA_IE_Msk);
     NVIC_EnableIRQ(SC012_IRQn);

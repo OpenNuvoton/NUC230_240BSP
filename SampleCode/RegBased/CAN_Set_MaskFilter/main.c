@@ -55,11 +55,15 @@ void CAN_CLR_INT_PENDING_BIT(CAN_T *tCAN, uint8_t u32MsgNum)
     uint32_t u32MsgIfNum = 0;
     uint32_t u32IFBusyCount = 0;
 
-    while(u32IFBusyCount < 0x10000000) {
-        if((tCAN->IF[0].CREQ & CAN_IF_CREQ_BUSY_Msk) == 0) {
+    while(u32IFBusyCount < 0x10000000)
+    {
+        if((tCAN->IF[0].CREQ & CAN_IF_CREQ_BUSY_Msk) == 0)
+        {
             u32MsgIfNum = 0;
             break;
-        } else if((tCAN->IF[1].CREQ  & CAN_IF_CREQ_BUSY_Msk) == 0) {
+        }
+        else if((tCAN->IF[1].CREQ  & CAN_IF_CREQ_BUSY_Msk) == 0)
+        {
             u32MsgIfNum = 1;
             break;
         }
@@ -79,7 +83,8 @@ int32_t CAN_ReadMsgObject(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 {
     uint32_t u32TimeOutCnt;
 
-    if(!CAN_GET_NEW_DATA_IN_BIT(tCAN, u8MsgObj)) {
+    if(!CAN_GET_NEW_DATA_IN_BIT(tCAN, u8MsgObj))
+    {
         return FALSE;
     }
 
@@ -98,18 +103,23 @@ int32_t CAN_ReadMsgObject(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 
     /*Wait*/
     u32TimeOutCnt = CAN_TIMEOUT;
-    while(tCAN->IF[1].CREQ & CAN_IF_CREQ_BUSY_Msk) {
-        if(--u32TimeOutCnt == 0) {
+    while(tCAN->IF[1].CREQ & CAN_IF_CREQ_BUSY_Msk)
+    {
+        if(--u32TimeOutCnt == 0)
+        {
             printf("Wait for CAN_IF1_CREQ register busy flag is cleared time-out!\n");
             return FALSE;
         }
     }
 
-    if((tCAN->IF[1].ARB2 & CAN_IF_ARB2_XTD_Msk) == 0) {
+    if((tCAN->IF[1].ARB2 & CAN_IF_ARB2_XTD_Msk) == 0)
+    {
         /* standard ID*/
         pCanMsg->IdType = CAN_STD_ID;
         pCanMsg->Id     = (tCAN->IF[1].ARB2 & CAN_IF_ARB2_ID_Msk) >> 2;
-    } else {
+    }
+    else
+    {
         /* extended ID*/
         pCanMsg->IdType = CAN_EXT_ID;
         pCanMsg->Id  = (((tCAN->IF[1].ARB2) & 0x1FFF) << 16) | tCAN->IF[1].ARB1;
@@ -133,17 +143,20 @@ int32_t CAN_ReadMsgObject(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMSG_T* pCanMsg)
 /*---------------------------------------------------------------------------------------------------------*/
 void CAN_MsgInterrupt(CAN_T *tCAN, uint32_t u32IIDR)
 {
-    if(u32IIDR == 1) {
+    if(u32IIDR == 1)
+    {
         printf("Msg-0 INT and Callback\n");
         CAN_ReadMsgObject(tCAN, 0, &rrMsg);
         CAN_ShowMsg(&rrMsg);
     }
-    if(u32IIDR == 5 + 1) {
+    if(u32IIDR == 5 + 1)
+    {
         printf("Msg-5 INT and Callback \n");
         CAN_ReadMsgObject(tCAN, 5, &rrMsg);
         CAN_ShowMsg(&rrMsg);
     }
-    if(u32IIDR == 31 + 1) {
+    if(u32IIDR == 31 + 1)
+    {
         printf("Msg-31 INT and Callback \n");
         CAN_ReadMsgObject(tCAN, 31, &rrMsg);
         CAN_ShowMsg(&rrMsg);
@@ -159,17 +172,20 @@ void CAN0_IRQHandler(void)
 
     u8IIDRstatus = CAN0->IIDR;
 
-    if(u8IIDRstatus == 0x00008000) {      /* Check Status Interrupt Flag (Error status Int and Status change Int) */
+    if(u8IIDRstatus == 0x00008000)        /* Check Status Interrupt Flag (Error status Int and Status change Int) */
+    {
         /**************************/
         /* Status Change interrupt*/
         /**************************/
-        if(CAN0->STATUS & CAN_STATUS_RXOK_Msk) {
+        if(CAN0->STATUS & CAN_STATUS_RXOK_Msk)
+        {
             CAN0->STATUS &= ~CAN_STATUS_RXOK_Msk;   /* Clear RxOK status*/
 
             printf("RxOK INT\n") ;
         }
 
-        if(CAN0->STATUS & CAN_STATUS_TXOK_Msk) {
+        if(CAN0->STATUS & CAN_STATUS_TXOK_Msk)
+        {
             CAN0->STATUS &= ~CAN_STATUS_TXOK_Msk;    /* Clear TxOK status*/
 
             printf("TxOK INT\n") ;
@@ -178,20 +194,26 @@ void CAN0_IRQHandler(void)
         /**************************/
         /* Error Status interrupt */
         /**************************/
-        if(CAN0->STATUS & CAN_STATUS_EWARN_Msk) {
+        if(CAN0->STATUS & CAN_STATUS_EWARN_Msk)
+        {
             printf("EWARN INT\n") ;
         }
 
-        if(CAN0->STATUS & CAN_STATUS_BOFF_Msk) {
+        if(CAN0->STATUS & CAN_STATUS_BOFF_Msk)
+        {
             printf("BOFF INT\n") ;
         }
-    } else if(u8IIDRstatus != 0) {
+    }
+    else if(u8IIDRstatus != 0)
+    {
         printf("=> Interrupt Pointer = %d\n", CAN0->IIDR - 1);
 
         CAN_MsgInterrupt(CAN0, u8IIDRstatus);
 
         CAN_CLR_INT_PENDING_BIT(CAN0, ((CAN0->IIDR) - 1)); /* Clear Interrupt Pending */
-    } else if(CAN0->WU_STATUS == 1) {
+    }
+    else if(CAN0->WU_STATUS == 1)
+    {
         printf("Wake up\n");
 
         CAN0->WU_STATUS = 0;    /* Write '0' to clear */
@@ -208,17 +230,20 @@ void CAN1_IRQHandler(void)
 
     u8IIDRstatus = CAN1->IIDR;
 
-    if(u8IIDRstatus == 0x00008000) {      /* Check Status Interrupt Flag (Error status Int and Status change Int) */
+    if(u8IIDRstatus == 0x00008000)        /* Check Status Interrupt Flag (Error status Int and Status change Int) */
+    {
         /**************************/
         /* Status Change interrupt*/
         /**************************/
-        if(CAN1->STATUS & CAN_STATUS_RXOK_Msk) {
+        if(CAN1->STATUS & CAN_STATUS_RXOK_Msk)
+        {
             CAN1->STATUS &= ~CAN_STATUS_RXOK_Msk;   /* Clear RxOK status*/
 
             printf("RxOK INT\n") ;
         }
 
-        if(CAN1->STATUS & CAN_STATUS_TXOK_Msk) {
+        if(CAN1->STATUS & CAN_STATUS_TXOK_Msk)
+        {
             CAN1->STATUS &= ~CAN_STATUS_TXOK_Msk;    /* Clear TxOK status*/
 
             printf("TxOK INT\n") ;
@@ -227,20 +252,26 @@ void CAN1_IRQHandler(void)
         /**************************/
         /* Error Status interrupt */
         /**************************/
-        if(CAN1->STATUS & CAN_STATUS_EWARN_Msk) {
+        if(CAN1->STATUS & CAN_STATUS_EWARN_Msk)
+        {
             printf("EWARN INT\n") ;
         }
 
-        if(CAN1->STATUS & CAN_STATUS_BOFF_Msk) {
+        if(CAN1->STATUS & CAN_STATUS_BOFF_Msk)
+        {
             printf("BOFF INT\n") ;
         }
-    } else if(u8IIDRstatus != 0) {
+    }
+    else if(u8IIDRstatus != 0)
+    {
         printf("=> Interrupt Pointer = %d\n", CAN1->IIDR - 1);
 
         CAN_MsgInterrupt(CAN1, u8IIDRstatus);
 
         CAN_CLR_INT_PENDING_BIT(CAN1, ((CAN1->IIDR) - 1)); /* Clear Interrupt Pending */
-    } else if(CAN1->WU_STATUS == 1) {
+    }
+    else if(CAN1->WU_STATUS == 1)
+    {
         printf("Wake up\n");
 
         CAN1->WU_STATUS = 0;    /* Write '0' to clear */
@@ -285,6 +316,7 @@ void CAN_ShowMsg(STR_CANMSG_T* Msg)
 
 void SYS_Init(void)
 {
+    uint32_t u32TimeOutCnt;
     /*---------------------------------------------------------------------------------------------------------*/
     /* Init System Clock                                                                                       */
     /*---------------------------------------------------------------------------------------------------------*/
@@ -293,7 +325,9 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_OSC22M_EN_Msk;
 
     /* Waiting for Internal RC clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_OSC22M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     /* Switch HCLK clock source to Internal RC */
     CLK->CLKSEL0 &= ~CLK_CLKSEL0_HCLK_S_Msk;
@@ -303,13 +337,17 @@ void SYS_Init(void)
     CLK->PWRCON |= CLK_PWRCON_XTL12M_EN_Msk;
 
     /* Waiting for external XTAL clock ready */
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_XTL12M_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
 
     FMC->FATCON |= 0x50;
 
     /* Set core clock as PLL_CLOCK from PLL */
     CLK->PLLCON = PLLCON_SETTING;
-    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk));
+    u32TimeOutCnt = __HIRC;
+    while(!(CLK->CLKSTATUS & CLK_CLKSTATUS_PLL_STB_Msk))
+		if(--u32TimeOutCnt == 0) break;
     CLK->CLKSEL0 &= (~CLK_CLKSEL0_HCLK_S_Msk);
     CLK->CLKSEL0 |= CLK_CLKSEL0_HCLK_S_PLL;
 
@@ -561,15 +599,19 @@ int32_t CAN_SetMsgObjMask(CAN_T *tCAN, uint8_t u8MsgObj, STR_CANMASK_T* MaskMsg)
     uint8_t u8MsgIfNum = 0;
 
     /* Check Free Interface for configure */
-    if((u8MsgIfNum = CAN_GetFreeIF(tCAN)) == 2) {
+    if((u8MsgIfNum = CAN_GetFreeIF(tCAN)) == 2)
+    {
         return FALSE;
     }
 
-    if(MaskMsg->u8IdType == CAN_STD_ID) {
+    if(MaskMsg->u8IdType == CAN_STD_ID)
+    {
         /* Set the Mask Standard ID(11-bit) for IFn Mask Register is used for acceptance filtering*/
         tCAN->IF[u8MsgIfNum].MASK1 =  0;
         tCAN->IF[u8MsgIfNum].MASK2 = ((MaskMsg->u32Id & 0x7FF) << 2) ;
-    } else {
+    }
+    else
+    {
         /* Set the Mask Extended ID(29-bit) for IFn Mask Register is used for acceptance filtering*/
         tCAN->IF[u8MsgIfNum].MASK1 = (MaskMsg->u32Id) & 0xFFFF;
         tCAN->IF[u8MsgIfNum].MASK2 = ((MaskMsg->u32Id) & 0x1FFF0000) >> 16 ;
@@ -604,17 +646,21 @@ int32_t CAN_SetRxMsgObj(CAN_T  *tCAN, uint8_t u8MsgObj, uint8_t u8idType, uint32
 {
     uint8_t u8MsgIfNum = 0;
 
-    if((u8MsgIfNum = CAN_GetFreeIF(tCAN)) == 2) {                       /* Check Free Interface for configure */
+    if((u8MsgIfNum = CAN_GetFreeIF(tCAN)) == 2)                         /* Check Free Interface for configure */
+    {
         return FALSE;
     }
     /* Command Setting */
     tCAN->IF[u8MsgIfNum].CMASK = CAN_IF_CMASK_WRRD_Msk | CAN_IF_CMASK_MASK_Msk | CAN_IF_CMASK_ARB_Msk |
                                  CAN_IF_CMASK_CONTROL_Msk | CAN_IF_CMASK_DATAA_Msk | CAN_IF_CMASK_DATAB_Msk;
 
-    if(u8idType == CAN_STD_ID) {  /* According STD/EXT ID format,Configure Mask and Arbitration register */
+    if(u8idType == CAN_STD_ID)    /* According STD/EXT ID format,Configure Mask and Arbitration register */
+    {
         tCAN->IF[u8MsgIfNum].ARB1 = 0;
         tCAN->IF[u8MsgIfNum].ARB2 = CAN_IF_ARB2_MSGVAL_Msk | (u32id & 0x7FF) << 2;
-    } else {
+    }
+    else
+    {
         tCAN->IF[u8MsgIfNum].ARB1 = u32id & 0xFFFF;
         tCAN->IF[u8MsgIfNum].ARB2 = CAN_IF_ARB2_MSGVAL_Msk | CAN_IF_ARB2_XTD_Msk | (u32id & 0x1FFF0000) >> 16;
     }
@@ -661,7 +707,7 @@ void Test_SetMaskFilter(CAN_T *tCAN)
     CAN_SetMsgObjMask(tCAN, MSG(0), &MaskMsg);
 
     /* Set Rx message object */
-    CAN_SetRxMsgObj(tCAN, MSG(0), CAN_STD_ID, 0x7FF , TRUE);
+    CAN_SetRxMsgObj(tCAN, MSG(0), CAN_STD_ID, 0x7FF, TRUE);
 
     printf("Set Receive Message Object Content\n");
     printf("===================================\n");
@@ -716,10 +762,10 @@ int main(void)
 
     /* Enable CAN transceiver for Nuvoton board */
     /* CAN0 */
-    PB->PMD = GPIO_PMD_OUTPUT << 3*2;
+    PB->PMD = GPIO_PMD_OUTPUT << 3 * 2;
     PB3 = 0;
     /* CAN1 */
-    PC->PMD = GPIO_PMD_OUTPUT << 5*2;
+    PC->PMD = GPIO_PMD_OUTPUT << 5 * 2;
     PC5 = 0;
 
 
@@ -746,6 +792,3 @@ int main(void)
     while(1);
 
 }
-
-
-
