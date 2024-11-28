@@ -70,7 +70,7 @@ int32_t SYS_Init(void)
     SYS->GPA_MFP |= (SYS_GPA_MFP_PA10_I2C1_SDA | SYS_GPA_MFP_PA11_I2C1_SCL);
 
     /* I2C clock pin enable schmitt trigger */
-    SYS->GPA_MFP |= (11<<SYS_GPA_MFP_GPA_TYPE_Pos);
+    SYS->GPA_MFP |= (BIT11 << SYS_GPA_MFP_GPA_TYPE_Pos);
 
     return 0;
 }
