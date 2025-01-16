@@ -4,7 +4,7 @@
 extern void Open_SPI_Flash(void);
 extern void Init_PDMA_CH1_for_SPI2_TX(uint32_t u32SrcAddr);
 extern void Init_PDMA_CH2_for_SPI2_RX(uint32_t u32DstAddr);
-extern unsigned int SpiFlash_w_PDMA_ReadMidDid(void);
+extern unsigned int SpiFlash_w_PDMA_ReadJedecID(void);
 extern void SpiFlash_w_PDMA_ChipErase(void);
 extern unsigned int SpiFlash_w_PDMA_ReadStatusReg1(void);
 extern unsigned int SpiFlash_w_PDMA_ReadStatusReg2(void);

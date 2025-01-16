@@ -18,7 +18,7 @@
 #define CH1                     1
 #define CH2                     2
 
-unsigned char   SrcArray[256];
+unsigned char SrcArray[256];
 unsigned char DestArray[256];
 /*---------------------------------------------------------------------------------------------------------*/
 /*  MAIN function                                                                                          */
@@ -29,7 +29,7 @@ int main(void)
     unsigned int u32PageNumber;
     unsigned int u32ProgramFlashAddress = 0;
     unsigned int u32VerifyFlashAddress = 0;
-    unsigned int MidDid;
+    unsigned int JedecID;
 
     PDMA_T *PDMA_CH1, *PDMA_CH2;
 
@@ -63,9 +63,9 @@ int main(void)
     /* Enable PDMA IRQ */
     NVIC_EnableIRQ(PDMA_IRQn);
 
-    /* Read MID & DID */
-    MidDid = SpiFlash_w_PDMA_ReadMidDid();
-    printf("\nMID and DID = %x", MidDid);
+    /* Read JEDEC ID */
+    JedecID = SpiFlash_w_PDMA_ReadJedecID();
+    printf("\nJEDEC ID = 0x%X", JedecID);
 
     /* Erase SPI Flash */
     SpiFlash_w_PDMA_ChipErase();

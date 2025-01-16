@@ -147,9 +147,8 @@ void Init_PDMA_CH2_for_SPI2_RX(uint32_t u32DstAddr)
 }
 
 // **************************************
-// For W25Q16BV, Manufacturer ID: 0xEF; Device ID: 0x14
-// For W26X16, Manufacturer ID: 0xEF; Device ID: 0x14
-unsigned int SpiFlash_w_PDMA_ReadMidDid(void)
+// For W25Q16BV, Manufacturer ID: 0xEF; Device ID: 0x4015
+unsigned int SpiFlash_w_PDMA_ReadJedecID(void)
 {
     unsigned int au32SourceData;
     unsigned int au32DestinationData;
@@ -160,8 +159,8 @@ unsigned int SpiFlash_w_PDMA_ReadMidDid(void)
     // /CS: active
     SPI_SET_SS0_LOW(SPI2);
 
-    // send Command: 0x90, Read Manufacturer/Device ID
-    au32SourceData = 0x90;
+    // send Command: 0x9F, Read JEDEC ID
+    au32SourceData = 0x9F;
     SPI2->TX[0] = au32SourceData;
     SPI2->CNTRL |= SPI_CNTRL_GO_BUSY_Msk;
 
@@ -171,17 +170,6 @@ unsigned int SpiFlash_w_PDMA_ReadMidDid(void)
     // configure transaction length as 24 bits
     //SPI2->CNTRL = SPI2->CNTRL & (~SPI_CNTRL_TX_BIT_LEN_Msk) | SPI_CNTRL_TX_BIT_LEN(24);
     SPI_SET_DATA_WIDTH(SPI2, 24);
-    // send 24-bit '0', dummy
-    au32SourceData = 0x0;
-    SPI2->TX[0] = au32SourceData;
-    SPI2->CNTRL |= SPI_CNTRL_GO_BUSY_Msk;
-
-    // wait
-    while(SPI2->CNTRL & SPI_CNTRL_GO_BUSY_Msk) {}
-
-    // configure transaction length as 16 bits
-    //SPI2->CNTRL = SPI2->CNTRL & (~SPI_CNTRL_TX_BIT_LEN_Msk) | SPI_CNTRL_TX_BIT_LEN(16);
-    SPI_SET_DATA_WIDTH(SPI2, 16);
     // receive
     au32SourceData = 0x0;
     SPI2->TX[0] = au32SourceData;
@@ -196,7 +184,7 @@ unsigned int SpiFlash_w_PDMA_ReadMidDid(void)
     // dump Rx register
     au32DestinationData = SPI2->RX[0];
 
-    return (au32DestinationData & 0xffff);
+    return (au32DestinationData & 0xFFFFFF);
 
 }
 
@@ -227,7 +215,7 @@ void SpiFlash_w_PDMA_ChipErase(void)
     //SPI2->SSR = SPI_SSR_SW_SS_PIN_LOW;
     SPI_SET_SS0_LOW(SPI2);
     // send Command: 0xC7, Chip Erase
-    au32SourceData = 0xc7;
+    au32SourceData = 0xC7;
     SPI2->TX[0] = au32SourceData;
     SPI2->CNTRL |= SPI_CNTRL_GO_BUSY_Msk;
 

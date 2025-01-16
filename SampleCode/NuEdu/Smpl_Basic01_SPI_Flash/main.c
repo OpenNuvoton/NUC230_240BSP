@@ -16,7 +16,7 @@
 
 #define TEST_NUMBER                 10 /* page numbers */
 
-unsigned char   SrcArray[256];
+unsigned char SrcArray[256];
 unsigned char DestArray[256];
 /*---------------------------------------------------------------------------------------------------------*/
 /*  MAIN function                                                                                          */
@@ -27,7 +27,7 @@ int main(void)
     unsigned int u32PageNumber;
     unsigned int u32ProgramFlashAddress = 0;
     unsigned int u32VerifyFlashAddress = 0;
-    unsigned int MidDid;
+    unsigned int JedecID;
 
     /* Initial system */
     SYS_Init();
@@ -48,9 +48,9 @@ int main(void)
     /* Open SPI for Serial Flash */
     Open_SPI_Flash();
 
-    /* Read MID & DID */
-    MidDid = SpiFlash_ReadMidDid();
-    printf("\nMID and DID = %x", MidDid);
+    /* Read JEDEC ID */
+    JedecID = SpiFlash_ReadJedecID();
+    printf("\nJEDEC ID = 0x%X", JedecID);
 
     /* Erase SPI Flash */
     SpiFlash_ChipErase();

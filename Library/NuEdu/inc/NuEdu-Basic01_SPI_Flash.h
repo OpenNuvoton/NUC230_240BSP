@@ -2,7 +2,7 @@
 #define __NuEdu_Basic01_SPI_FLASH_H__
 
 extern void Open_SPI_Flash(void);
-extern unsigned int SpiFlash_ReadMidDid(void);
+extern unsigned int SpiFlash_ReadJedecID(void);
 extern void SpiFlash_ChipErase(void);
 extern unsigned int SpiFlash_ReadStatusReg1(void);
 extern unsigned int SpiFlash_ReadStatusReg2(void);

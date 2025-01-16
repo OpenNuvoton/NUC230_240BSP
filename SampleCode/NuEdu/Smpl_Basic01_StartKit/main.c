@@ -21,7 +21,7 @@ int main(void)
 {
     int i, j, k;
     unsigned int temp;
-    unsigned int MidDid;
+    unsigned int JedecID;
     SYS_Init();
     Open_ADC_Knob();
     Initial_PWM_LED();
@@ -32,11 +32,11 @@ int main(void)
     Open_SPI_Flash();
 
 
-    /* Read MID & DID */
-    MidDid = SpiFlash_ReadMidDid();
-    printf("\nMID and DID = 0x%x", MidDid);
+    /* Read JEDEC ID */
+    JedecID = SpiFlash_ReadJedecID();
+    printf("\nJEDEC ID = 0x%X", JedecID);
     k = 1;
-    while(MidDid != 0xef14);
+	while((JedecID & 0xFFFF) != 0xEF4015)
 
     I2C_EEPROM_Init();
     I2C_EEPROM_Write(0x0010, 0x55);
