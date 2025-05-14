@@ -50,8 +50,13 @@ extern "C"
 #define I2C_GCMODE_DISABLE          0      /*!< Disable I2C GC Mode                                                       */
 
 #define I2C_TIMEOUT                 SystemCoreClock /*!< I2C time-out counter (1 second time-out)                         */
+#define I2C_OK                      ( 0L)  /*!< I2C operation OK                                                          */
+#define I2C_ERR_FAIL                (-1L)  /*!< I2C operation failed                                                      */
+#define I2C_ERR_TIMEOUT             (-2L)  /*!< I2C operation abort due to timeout error                                  */
 
 /*@}*/ /* end of group I2C_EXPORTED_CONSTANTS */
+
+extern int32_t g_I2C_i32ErrCode;
 
 /** @addtogroup I2C_EXPORTED_FUNCTIONS I2C Exported Functions
   @{
@@ -89,6 +94,17 @@ extern "C"
  *    @details      When a new status is presented of I2C bus, the SI flag will be set in I2CON register.
  */
 #define I2C_WAIT_READY(i2c)     while(!((i2c)->I2CON & I2C_I2CON_SI_Msk))
+
+/**
+ *    @brief        The macro is used to wait for the I2C bus status to be cleared.
+ *
+ *    @param[in]    i2c        Specify I2C port
+ *
+ *    @return       None
+ *
+ *    @details      When the interrupt task is completed, the SI flag will be set and cleared.
+ */
+#define I2C_WAIT_SI_CLEAR(i2c)  while(((i2c)->I2CON & I2C_I2CON_SI_Msk) == I2C_I2CON_SI_Msk)
 
 /**
  *    @brief        The macro is used to Read I2C Bus Data Register
@@ -199,7 +215,18 @@ void I2C_DisableTimeout(I2C_T *i2c);
 void I2C_EnableWakeup(I2C_T *i2c);
 void I2C_DisableWakeup(I2C_T *i2c);
 void I2C_SetData(I2C_T *i2c, uint8_t u8Data);
-
+uint8_t I2C_WriteByte(I2C_T *i2c, uint8_t u8SlaveAddr, const uint8_t data);
+uint32_t I2C_WriteMultiBytes(I2C_T *i2c, uint8_t u8SlaveAddr, const uint8_t *data, uint32_t u32wLen);
+uint8_t I2C_WriteByteOneReg(I2C_T *i2c, uint8_t u8SlaveAddr, uint8_t u8DataAddr, const uint8_t data);
+uint32_t I2C_WriteMultiBytesOneReg(I2C_T *i2c, uint8_t u8SlaveAddr, uint8_t u8DataAddr, const uint8_t *data, uint32_t u32wLen);
+uint8_t I2C_WriteByteTwoRegs(I2C_T *i2c, uint8_t u8SlaveAddr, uint16_t u16DataAddr, const uint8_t data);
+uint32_t I2C_WriteMultiBytesTwoRegs(I2C_T *i2c, uint8_t u8SlaveAddr, uint16_t u16DataAddr, const uint8_t *data, uint32_t u32wLen);
+uint8_t I2C_ReadByte(I2C_T *i2c, uint8_t u8SlaveAddr);
+uint32_t I2C_ReadMultiBytes(I2C_T *i2c, uint8_t u8SlaveAddr, uint8_t *rdata, uint32_t u32rLen);
+uint8_t I2C_ReadByteOneReg(I2C_T *i2c, uint8_t u8SlaveAddr, uint8_t u8DataAddr);
+uint32_t I2C_ReadMultiBytesOneReg(I2C_T *i2c, uint8_t u8SlaveAddr, uint8_t u8DataAddr, uint8_t *rdata, uint32_t u32rLen);
+uint8_t I2C_ReadByteTwoRegs(I2C_T *i2c, uint8_t u8SlaveAddr, uint16_t u16DataAddr);
+uint32_t I2C_ReadMultiBytesTwoRegs(I2C_T *i2c, uint8_t u8SlaveAddr, uint16_t u16DataAddr, uint8_t *rdata, uint32_t u32rLen);
 /*@}*/ /* end of group I2C_EXPORTED_FUNCTIONS */
 
 /*@}*/ /* end of group I2C_Driver */
