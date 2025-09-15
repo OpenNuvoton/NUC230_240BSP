@@ -267,6 +267,30 @@ extern const S_USBD_INFO_T gsInfo;
 #define USBD_CLR_SE0()              ((uint32_t)(USBD->DRVSE0 &= ~USBD_DRVSE0))
 
 /**
+  * @brief    Disconnect from the USB host using software settings
+  *
+  * @param    None
+  *
+  * @return   None
+  *
+  * @details  Set USB_DRVSE0 register to enable SE0 to disconnect USBD from the USB host.
+  *
+  */
+#define USBD_SwDisconnect()         ((uint32_t)(USBD->DRVSE0 |= USBD_DRVSE0))
+
+/**
+  * @brief    Reconnect to the USB host using software settings
+  *
+  * @param    None
+  *
+  * @return   None
+  *
+  * @details  Clear USB_DRVSE0 register to disable SE0 to reconnect USBD to the USB host.
+  *
+  */
+#define USBD_SwReconnect()          ((uint32_t)(USBD->DRVSE0 &= ~USBD_DRVSE0))
+
+/**
   * @brief       Set USB device address
   *
   * @param[in]   addr The USB device address.
